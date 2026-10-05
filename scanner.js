@@ -1,30 +1,45 @@
-// Bingo A+ Scanner v1
-// 第一階段：測試 scanner.js → API → 網頁
+// Bingo A+ Scanner v2
+// Step 1：測試抓取奧索 Bingo 資料
 
-const API_URL = "https://bingo-a-plus-signal.onrender.com/api/signal";
+const SOURCE_URL = "https://lotto.auzo.tw/RK.php";
 
-async function sendSignal() {
-  const signal = {
-    time: new Date().toISOString(),
-    numbers: ["08", "27", "46", "71"],
-    level: "A+"
-  };
-
+async function main() {
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
+    console.log("=== Bingo A+ Scanner 啟動 ===");
+    console.log("抓取來源：", SOURCE_URL);
+
+    const response = await fetch(SOURCE_URL, {
+      method: "GET",
       headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(signal)
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html,application/xhtml+xml"
+      }
     });
 
-    const data = await response.json();
+    console.log("HTTP 狀態：", response.status);
 
-    console.log("A+ 訊號送出成功：", data);
+    if (!response.ok) {
+      throw new Error(
+        `抓取失敗 HTTP ${response.status}`
+      );
+    }
+
+    const html = await response.text();
+
+    console.log("抓取成功！");
+    console.log("資料長度：", html.length);
+
+    // 先輸出前 3000 字元，
+    // 用來確認網站實際回傳的資料格式
+    console.log("===== DATA START =====");
+    console.log(html.slice(0, 3000));
+    console.log("===== DATA END =====");
+
   } catch (error) {
-    console.error("送出訊號失敗：", error);
+    console.error("Scanner 發生錯誤：");
+    console.error(error);
+    process.exit(1);
   }
 }
 
-sendSignal();
+main();
