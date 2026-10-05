@@ -1,5 +1,5 @@
-// Bingo A+ Scanner v7
-// Step 4：抓取每一期資料 + Bf21b 欄位
+// Bingo A+ Scanner v8
+// 直接解析 BPeriod + 開獎號碼 + Bf21b
 
 function taiwanDate() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -15,35 +15,34 @@ function taiwanDate() {
   return `${get("year")}${get("month")}${get("day")}`;
 }
 
-function stripTags(text) {
-  return text
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
+function cleanText(text) {
+  return String(text || "")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
     .replace(/&#(\d+);/g, (_, n) =>
       String.fromCharCode(Number(n))
     )
+    .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 async function main() {
-
   const date = taiwanDate();
 
   const url =
     `https://lotto.auzo.tw/bingobingo/list_${date}.html`;
 
-  console.log("=== Bingo A+ Scanner v7 ===");
+  console.log("=== Bingo A+ Scanner v8 ===");
   console.log("台灣日期：", date);
   console.log("抓取網址：", url);
 
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0",
-      "Accept": "text/html"
+      "User-Agent":
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15",
+      "Accept":
+        "text/html,application/xhtml+xml"
     }
   });
 
@@ -57,122 +56,225 @@ async function main() {
 
   console.log("HTML 長度：", html.length);
   console.log("✅ 網頁取得成功");
-
-  // 找出每一個開獎資料列
-  const rowRegex =
-    /<tr[^>]*class=["']bingo_row["'][^>]*>([\s\S]*?)<\/tr>/gi;
-
-  const rows = [...html.matchAll(rowRegex)];
-
   console.log("");
-  console.log("找到開獎資料列：", rows.length);
-  console.log("");
+
+  // ==========================================
+  // 1. 找每一個 BPeriod 的位置
+  // ==========================================
+
+  const periodRegex =
+    /<td[^>]*class\s*=\s*["']BPeriod["'][^>]*>/gi;
+
+  const periodMatches =
+    [...html.matchAll(periodRegex)];
+
+  console.log(
+    "找到 BPeriod：",
+    periodMatches.length
+  );
 
   const results = [];
 
-  for (const match of rows) {
+  // ==========================================
+  // 2. 每個 BPeriod 到下一個 BPeriod
+  //    視為一筆開獎資料
+  // ==========================================
 
-    const rowHtml = match[1];
+  for (
+    let i = 0;
+    i < periodMatches.length;
+    i++
+  ) {
+    const start =
+      periodMatches[i].index;
 
-    // -------------------------
-    // 期號 + 時間
-    // -------------------------
+    const end =
+      i + 1 < periodMatches.length
+        ? periodMatches[i + 1].index
+        : html.length;
+
+    const block =
+      html.slice(start, end);
+
+    // --------------------------
+    // 期號
+    // --------------------------
 
     const periodMatch =
-      rowHtml.match(
-        /class=["']BPeriod["'][^>]*>\s*<b>(\d+)<\/b>\s*<br\s*\/?>(\d{2}:\d{2})/i
+      block.match(
+        /<b>\s*(\d{6,})\s*<\/b>/i
       );
 
     if (!periodMatch) {
       continue;
     }
 
-    const period = periodMatch[1];
-    const time = periodMatch[2];
+    const period =
+      periodMatch[1];
 
-    // -------------------------
-    // 抓 20 顆號碼
-    // -------------------------
+    // --------------------------
+    // 時間
+    // --------------------------
+
+    const timeMatch =
+      block.match(
+        /<br\s*\/?>\s*(\d{1,2}:\d{2})/i
+      );
+
+    const time =
+      timeMatch
+        ? timeMatch[1]
+        : "--:--";
+
+    // --------------------------
+    // 20 顆開獎號碼
+    //
+    // 你前一張圖已確認號碼
+    // 是放在 brn / brns / bbrp
+    // brlp / bbn / bblp 等 class
+    // --------------------------
 
     const numbers = [];
 
-    const numberRegex =
-      /<div[^>]*class=["'][^"']*(?:brn|brns|bbrp|brlp|bbn|bblp)[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi;
+    const divRegex =
+      /<div[^>]*class\s*=\s*["']([^"']+)["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi;
 
-    let numberMatch;
+    let divMatch;
 
     while (
-      (numberMatch = numberRegex.exec(rowHtml)) !== null
+      (divMatch =
+        divRegex.exec(block)) !== null
     ) {
-      numbers.push(
-        numberMatch[1].padStart(2, "0")
-      );
+      const className =
+        divMatch[1];
+
+      const value =
+        divMatch[2];
+
+      if (
+        /^(brn|brns|bbrp|brlp|bbn|bblp)$/i.test(
+          className
+        )
+      ) {
+        numbers.push(
+          value.padStart(2, "0")
+        );
+      }
     }
 
-    // -------------------------
-    // 抓 Bf21b
-    // -------------------------
+    // --------------------------
+    // Bf21b
+    // --------------------------
 
     const bfMatch =
-      rowHtml.match(
-        /<td[^>]*class=["']Bf21b["'][^>]*>\s*([^<]*)\s*<\/td>/i
+      block.match(
+        /<td[^>]*class\s*=\s*["']Bf21b["'][^>]*>([\s\S]*?)<\/td>/i
       );
 
-    const bf21b = bfMatch
-      ? stripTags(bfMatch[1])
-      : "";
+    const bf21b =
+      bfMatch
+        ? cleanText(bfMatch[1])
+        : "";
 
     results.push({
       period,
       time,
-      numbers,
+      numbers: numbers.slice(0, 20),
       bf21b
     });
   }
 
-  console.log("================================");
+  // ==========================================
+  // 顯示結果
+  // ==========================================
+
+  console.log("");
+  console.log(
+    "================================"
+  );
+
   console.log("🎯 解析結果");
-  console.log("================================");
 
-  for (const item of results) {
+  console.log(
+    "================================"
+  );
 
-    console.log("");
-    console.log(
-      `期號：${item.period} ｜ 時間：${item.time}`
-    );
+  results.forEach(
+    (item, index) => {
 
-    console.log(
-      `20顆：${item.numbers.join(" ")}`
-    );
+      console.log("");
+      console.log(
+        `#${index + 1}`
+      );
 
-    console.log(
-      `Bf21b：${item.bf21b || "無資料"}`
-    );
-  }
+      console.log(
+        `期號：${item.period}`
+      );
+
+      console.log(
+        `時間：${item.time}`
+      );
+
+      console.log(
+        `號碼(${item.numbers.length})：${item.numbers.join(" ")}`
+      );
+
+      console.log(
+        `Bf21b：${item.bf21b || "無資料"}`
+      );
+    }
+  );
 
   console.log("");
-  console.log("================================");
-  console.log(`總共解析：${results.length} 期`);
-  console.log("================================");
+  console.log(
+    "================================"
+  );
 
-  // 額外顯示最近 12 期
-  const latest12 = results.slice(0, 12);
+  console.log(
+    `總共解析：${results.length} 期`
+  );
+
+  console.log(
+    "================================"
+  );
+
+  // ==========================================
+  // 最近 12 期
+  // ==========================================
 
   console.log("");
-  console.log("🔥 最近 12 期 Bf21b");
-  console.log("--------------------------------");
+  console.log(
+    "🔥 最近 12 期"
+  );
 
-  for (const item of latest12) {
-    console.log(
-      `${item.time} ｜ ${item.period} ｜ ${item.bf21b || "-"}`
-    );
-  }
+  console.log(
+    "--------------------------------"
+  );
 
-  console.log("--------------------------------");
+  const latest12 =
+    results.slice(0, 12);
+
+  latest12.forEach(
+    (item) => {
+
+      console.log(
+        `${item.time} ｜ ${item.period} ｜ Bf21b=${item.bf21b || "-"} ｜ ${item.numbers.join(" ")}`
+      );
+
+    }
+  );
+
+  console.log(
+    "--------------------------------"
+  );
 }
 
 main().catch((error) => {
-  console.error("❌ Scanner 發生錯誤");
+  console.error(
+    "❌ Scanner 發生錯誤"
+  );
+
   console.error(error);
+
   process.exit(1);
 });
