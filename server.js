@@ -23,7 +23,31 @@ app.get("/api/status", (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+// A+ 訊號 API
+let latestSignal = {
+  time: null,
+  numbers: [],
+  level: "WAIT"
+};
 
+app.get("/api/signal", (req, res) => {
+  res.json(latestSignal);
+});
+
+app.post("/api/signal", (req, res) => {
+  const { time, numbers, level } = req.body;
+
+  latestSignal = {
+    time: time || new Date().toISOString(),
+    numbers: Array.isArray(numbers) ? numbers : [],
+    level: level || "A+"
+  };
+
+  res.json({
+    ok: true,
+    signal: latestSignal
+  });
+});
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
