@@ -317,3 +317,5 @@ async function main() {
   console.log("");
 console.log("==============================");
 console.log("=== Bingo A+ 掃描儀 v12 ===");
+}
+main();
