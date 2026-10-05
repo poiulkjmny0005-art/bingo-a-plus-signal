@@ -1,5 +1,5 @@
-// Bingo A+ Scanner v5
-// Step 2：抓取開獎頁面並尋找「超級獎號」資料
+// Bingo A+ Scanner v6
+// Step 3：分析 Bingo 開獎頁面的 HTML 結構
 
 function taiwanDate() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -15,19 +15,32 @@ function taiwanDate() {
   return `${get("year")}${get("month")}${get("day")}`;
 }
 
+function stripTags(text) {
+  return text
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&#(\d+);/g, (_, n) =>
+      String.fromCharCode(Number(n))
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function main() {
   const date = taiwanDate();
 
   const url =
     `https://lotto.auzo.tw/bingobingo/list_${date}.html`;
 
-  console.log("=== Bingo A+ Scanner v5 ===");
+  console.log("=== Bingo A+ Scanner v6 ===");
   console.log("台灣日期：", date);
   console.log("抓取網址：", url);
 
   try {
     const response = await fetch(url, {
-      method: "GET",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
@@ -49,85 +62,145 @@ async function main() {
     console.log("HTML 長度：", html.length);
     console.log("✅ 網頁取得成功");
 
-    // 移除換行，方便搜尋附近 HTML
-    const cleanHtml = html
-      .replace(/\r/g, "")
-      .replace(/\n/g, " ")
-      .replace(/\t/g, " ");
+    // -------------------------
+    // 1. 找所有 table
+    // -------------------------
 
-    // 尋找「超級獎號」
-    const keywords = [
-      "超級獎號",
-      "超級獎",
-      "超級",
-      "猜大小",
-      "猜單雙"
-    ];
+    const tables =
+      html.match(/<table\b[\s\S]*?<\/table>/gi) || [];
 
     console.log("");
-    console.log("===== 開始搜尋關鍵字 =====");
+    console.log("===== TABLE 分析 =====");
+    console.log("找到 table 數量：", tables.length);
 
-    let foundAnything = false;
+    tables.slice(0, 15).forEach((table, index) => {
 
-    for (const keyword of keywords) {
-      let start = 0;
-      let count = 0;
+      const text = stripTags(table);
 
-      while (true) {
-        const index = cleanHtml.indexOf(keyword, start);
+      console.log("");
+      console.log(
+        `===== TABLE ${index + 1} =====`
+      );
 
-        if (index === -1) break;
+      console.log(
+        text.slice(0, 1200)
+      );
 
-        foundAnything = true;
-        count++;
+      console.log(
+        `===== TABLE ${index + 1} END =====`
+      );
+    });
 
-        const from = Math.max(0, index - 500);
-        const to = Math.min(
-          cleanHtml.length,
-          index + keyword.length + 800
-        );
+    // -------------------------
+    // 2. 找所有 TR
+    // -------------------------
+
+    const rows =
+      html.match(/<tr\b[\s\S]*?<\/tr>/gi) || [];
+
+    console.log("");
+    console.log("===== ROW 分析 =====");
+    console.log("找到 tr 數量：", rows.length);
+
+    let shown = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+
+      const text = stripTags(rows[i]);
+
+      // 我們只顯示「看起來像開獎資料」的 row
+      // 有時間、期數或很多數字就顯示
+      const hasTime =
+        /\b\d{1,2}:\d{2}\b/.test(text);
+
+      const numbers =
+        text.match(/\b\d{1,2}\b/g) || [];
+
+      if (hasTime || numbers.length >= 10) {
+
+        shown++;
 
         console.log("");
         console.log(
-          `===== ${keyword} 第 ${count} 個位置 =====`
+          `===== 候選 ROW ${i + 1} =====`
         );
 
-        console.log(cleanHtml.slice(from, to));
+        console.log("文字內容：");
+        console.log(text.slice(0, 1500));
+
+        console.log("");
+        console.log("原始 HTML：");
+        console.log(
+          rows[i].slice(0, 2500)
+        );
 
         console.log(
-          `===== ${keyword} 第 ${count} 個位置結束 =====`
+          `===== ROW ${i + 1} END =====`
         );
 
-        start = index + keyword.length;
-
-        // 每個關鍵字最多顯示前 5 個，
-        // 避免 GitHub log 太長
-        if (count >= 5) {
-          console.log(
-            `⚠️ ${keyword} 超過 5 個結果，暫停輸出`
-          );
+        // 先看前 12 筆即可
+        if (shown >= 12) {
           break;
         }
       }
-
-      console.log(
-        `搜尋「${keyword}」：找到 ${count} 個位置`
-      );
     }
 
     console.log("");
-    console.log("===== 搜尋完成 =====");
+    console.log("候選開獎 ROW 顯示數量：", shown);
 
-    if (!foundAnything) {
-      console.log("⚠️ 暫時沒有找到超級獎號文字");
-      console.log("下一步將改用 HTML 結構解析");
-    } else {
-      console.log("✅ 找到相關資料");
+    // -------------------------
+    // 3. 尋找 01~80 號碼密集區
+    // -------------------------
+
+    console.log("");
+    console.log("===== 號碼密集區分析 =====");
+
+    const plainText = stripTags(html);
+
+    const chunks =
+      plainText.split(/(?=\d{1,2}:\d{2})/);
+
+    let chunkCount = 0;
+
+    for (const chunk of chunks) {
+
+      const nums =
+        chunk.match(/\b(?:[1-9]|[1-7]\d|80)\b/g) || [];
+
+      if (nums.length >= 15) {
+
+        chunkCount++;
+
+        console.log("");
+        console.log(
+          `===== 號碼區 ${chunkCount} =====`
+        );
+
+        console.log(
+          chunk.slice(0, 1800)
+        );
+
+        if (chunkCount >= 10) {
+          break;
+        }
+      }
     }
 
+    console.log("");
+    console.log("===== v6 分析完成 =====");
+    console.log(
+      "找到候選 ROW：",
+      shown
+    );
+
   } catch (error) {
-    console.error("❌ Scanner 發生錯誤");
+
+    console.error(
+      "❌ Scanner v6 發生錯誤"
+    );
+
     console.error(error);
+
     process.exitCode = 1;
   }
 }
