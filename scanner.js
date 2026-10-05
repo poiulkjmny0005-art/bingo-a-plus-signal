@@ -318,7 +318,7 @@ async function main() {
   console.log("=== Bingo A+ 掃描儀 v13 ===");
   console.log("==============================");
 
-  const date = taiwanDate();
+  const date = taiwanDate(-1);
 
   console.log("");
   console.log("📅 台灣日期：" + date);
