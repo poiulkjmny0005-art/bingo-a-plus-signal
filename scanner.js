@@ -1,21 +1,16 @@
-// Bingo A+ Scanner v10
-// 今天沒資料 → 自動往前找最近有開獎資料的日期
-// 解析：期號 / 時間 / 20顆號碼 / 後方欄位
+// Bingo A+ Scanner v11
+// Step 6：精準辨識「超級獎號」欄位
 
-function taiwanDateOffset(daysAgo = 0) {
+function taiwanDate(offsetDays = 0) {
   const now = new Date();
-
-  // 用毫秒往前推日期
-  const target = new Date(
-    now.getTime() - daysAgo * 24 * 60 * 60 * 1000
-  );
+  now.setUTCDate(now.getUTCDate() + offsetDays);
 
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Taipei",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
-  }).formatToParts(target);
+  }).formatToParts(now);
 
   const get = (type) =>
     parts.find((p) => p.type === type)?.value;
@@ -23,45 +18,47 @@ function taiwanDateOffset(daysAgo = 0) {
   return `${get("year")}${get("month")}${get("day")}`;
 }
 
-function cleanText(html) {
-  return String(html || "")
+function cleanText(text) {
+  return text
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
     .replace(/&#(\d+);/g, (_, n) =>
       String.fromCharCode(Number(n))
     )
-    .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-async function fetchDate(date) {
+function getClass(tag) {
+  const m = tag.match(/class\s*=\s*["']([^"']+)["']/i);
+  return m ? m[1] : "";
+}
+
+async function fetchPage(date) {
   const url =
     `https://lotto.auzo.tw/bingobingo/list_${date}.html`;
 
   console.log("");
-  console.log(`🔎 嘗試日期：${date}`);
-  console.log(`網址：${url}`);
+  console.log("🔎 嘗試日期：" + date);
+  console.log("網址：" + url);
 
   const response = await fetch(url, {
     headers: {
       "User-Agent": "Mozilla/5.0",
-      "Accept": "text/html,application/xhtml+xml"
+      "Accept": "text/html"
     }
   });
 
-  console.log(`HTTP：${response.status}`);
+  console.log("HTTP：" + response.status);
 
-  if (!response.ok) {
-    return null;
-  }
+  if (!response.ok) return null;
 
   const html = await response.text();
 
-  console.log(`HTML 長度：${html.length}`);
+  console.log("HTML 長度：" + html.length);
 
   return {
     date,
@@ -70,242 +67,247 @@ async function fetchDate(date) {
   };
 }
 
-async function main() {
-  console.log("=== Bingo A+ Scanner v10 ===");
-  console.log("尋找最近有開獎資料的日期...");
-
-  let page = null;
-
-  // =====================================
-  // 最多往前找 7 天
-  // =====================================
-
-  for (let daysAgo = 0; daysAgo < 7; daysAgo++) {
-    const date = taiwanDateOffset(daysAgo);
-
-    const test = await fetchDate(date);
-
-    if (!test) {
-      continue;
-    }
-
-    const text = cleanText(test.html);
-
-    // 網頁直接說今天沒有任何球號
-    if (
-      text.includes("您查詢的日期未開出任何球號")
-    ) {
-      console.log("⚠️ 此日期目前沒有開獎資料");
-      continue;
-    }
-
-    // 根據之前成功抓到的資料格式：
-    // 期號 + HH:MM
-    const hasDraw =
-      /\b\d{8,10}\s+\d{1,2}:\d{2}\b/.test(text);
-
-    if (hasDraw) {
-      page = test;
-
-      console.log("");
-      console.log("✅ 找到有開獎資料的日期！");
-      console.log(`使用日期：${date}`);
-
-      break;
-    }
-
-    console.log("⚠️ 沒偵測到開獎資料");
-  }
-
-  if (!page) {
-    console.log("");
-    console.log("❌ 最近 7 天都沒有找到可解析資料");
-    return;
-  }
-
-  const html = page.html;
-
-  // =====================================
-  // 找所有 TR
-  // =====================================
-
-  const rowRegex =
-    /<tr\b[^>]*>([\s\S]*?)<\/tr>/gi;
-
+function findBingoRows(html) {
   const rows =
-    [...html.matchAll(rowRegex)];
+    html.match(/<tr\b[^>]*class=["'][^"']*bingo_row[^"']*["'][^>]*>[\s\S]*?<\/tr>/gi)
+    || [];
 
-  console.log("");
-  console.log(`找到全部 TR：${rows.length}`);
+  return rows;
+}
 
-  const results = [];
+function parseRow(rowHtml, index) {
 
-  // =====================================
-  // 分析 TR
-  // =====================================
+  const tdRegex = /<td\b([^>]*)>([\s\S]*?)<\/td>/gi;
 
-  for (let i = 0; i < rows.length; i++) {
-    const rowHtml = rows[i][0];
+  const cells = [];
 
-    const text =
-      cleanText(rowHtml);
+  let match;
 
-    // 找期號 + 時間
-    const headerMatch =
-      text.match(
-        /\b(\d{8,10})\s+([01]?\d|2[0-3]):([0-5]\d)\b/
-      );
+  while ((match = tdRegex.exec(rowHtml)) !== null) {
 
-    if (!headerMatch) {
-      continue;
-    }
+    const fullTag = `<td${match[1]}>`;
 
-    const period =
-      headerMatch[1];
-
-    const time =
-      `${headerMatch[2].padStart(2, "0")}:${headerMatch[3]}`;
-
-    // =====================================
-    // 抓 20 顆球
-    // =====================================
-
-    const numbers = [];
-
-    const ballRegex =
-      /<div[^>]*class\s*=\s*["'][^"']*(?:brn|brns|bbrp|brlp|bbn|bblp)[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi;
-
-    let ballMatch;
-
-    while (
-      (ballMatch = ballRegex.exec(rowHtml)) !== null
-    ) {
-      const n =
-        Number(ballMatch[1]);
-
-      if (
-        n >= 1 &&
-        n <= 80
-      ) {
-        numbers.push(
-          String(n).padStart(2, "0")
-        );
-      }
-    }
-
-    // =====================================
-    // 抓 TD 欄位
-    // =====================================
-
-    const tdValues = [];
-
-    const tdRegex =
-      /<td\b[^>]*>([\s\S]*?)<\/td>/gi;
-
-    let tdMatch;
-
-    while (
-      (tdMatch = tdRegex.exec(rowHtml)) !== null
-    ) {
-      const value =
-        cleanText(tdMatch[1]);
-
-      if (value !== "") {
-        tdValues.push(value);
-      }
-    }
-
-    // =====================================
-    // 抓 Bf21b
-    // =====================================
-
-    const bfMatch =
-      rowHtml.match(
-        /<td[^>]*class\s*=\s*["'][^"']*Bf21b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i
-      );
-
-    const bf21b =
-      bfMatch
-        ? cleanText(bfMatch[1])
-        : "";
-
-    results.push({
-      row: i + 1,
-      period,
-      time,
-      numbers: numbers.slice(0, 20),
-      bf21b,
-      tdValues
+    cells.push({
+      index: cells.length,
+      className: getClass(fullTag),
+      text: cleanText(match[2]),
+      raw: match[2]
     });
   }
 
-  // =====================================
-  // 顯示結果
-  // =====================================
+  const periodCell =
+    cells.find(c => c.className.includes("BPeriod"));
+
+  if (!periodCell) return null;
+
+  const periodText = periodCell.text;
+
+  const periodMatch =
+    periodText.match(/(\d{8,})\s*(\d{1,2}:\d{2})?/);
+
+  if (!periodMatch) return null;
+
+  const period = periodMatch[1];
+  const time = periodMatch[2] || "";
+
+  // 抓 20 顆 Bingo 號碼
+  const bingoNumbers = [];
+
+  const numberRegex =
+    /<div\b[^>]*class=["'][^"']*(?:brn|brns|bbrp|brlp|bbn|bbrn|bblp)[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi;
+
+  let nm;
+
+  while ((nm = numberRegex.exec(rowHtml)) !== null) {
+    const n = Number(nm[1]);
+
+    if (
+      n >= 1 &&
+      n <= 80 &&
+      !bingoNumbers.includes(n)
+    ) {
+      bingoNumbers.push(n);
+    }
+  }
+
+  return {
+    rowIndex: index,
+    period,
+    time,
+    bingoNumbers,
+    cells,
+    raw: rowHtml
+  };
+}
+
+async function main() {
 
   console.log("");
   console.log("================================");
-  console.log("🎯 Bingo 開獎解析結果");
+  console.log("=== Bingo A+ Scanner v11 ===");
   console.log("================================");
 
-  console.log(`資料日期：${page.date}`);
-  console.log(`解析期數：${results.length}`);
+  let page = null;
 
-  // 最近 12 期
-  const latest12 =
-    results.slice(0, 12);
+  // 今天沒有資料時，自動往前找
+  for (let offset = 0; offset >= -7; offset--) {
+
+    const date = taiwanDate(offset);
+
+    const test = await fetchPage(date);
+
+    if (!test) continue;
+
+    const rows = findBingoRows(test.html);
+
+    console.log("找到 bingo_row：" + rows.length);
+
+    if (rows.length > 0) {
+      page = test;
+      break;
+    }
+  }
+
+  if (!page) {
+    console.log("❌ 最近 7 天都找不到開獎資料");
+    return;
+  }
 
   console.log("");
-  console.log("🔥 最近 12 期");
-  console.log("--------------------------------");
+  console.log("✅ 使用日期：" + page.date);
 
-  latest12.forEach((item, index) => {
+  const rawRows = findBingoRows(page.html);
+
+  const parsed = rawRows
+    .map((row, i) => parseRow(row, i))
+    .filter(Boolean);
+
+  console.log("成功解析：" + parsed.length + " 期");
+
+  console.log("");
+  console.log("================================");
+  console.log("🎯 最新一期完整欄位診斷");
+  console.log("================================");
+
+  if (!parsed.length) {
+    console.log("❌ 無法解析開獎列");
+    return;
+  }
+
+  const latest = parsed[0];
+
+  console.log("");
+  console.log("期號：" + latest.period);
+  console.log("時間：" + latest.time);
+
+  console.log(
+    "20顆(" + latest.bingoNumbers.length + ")：" +
+    latest.bingoNumbers
+      .map(n => String(n).padStart(2, "0"))
+      .join(" ")
+  );
+
+  console.log("");
+  console.log("========== TD 欄位 ==========");
+
+  latest.cells.forEach((cell) => {
+
     console.log("");
-    console.log(`#${index + 1}`);
-
     console.log(
-      `${item.time} ｜ ${item.period}`
+      `TD[${cell.index}] class="${cell.className}"`
     );
 
     console.log(
-      `20顆(${item.numbers.length})：${item.numbers.join(" ")}`
+      `文字：${cell.text || "(空白)"}`
+    );
+
+    // 額外找數字
+    const nums =
+      cell.text.match(/\b\d{1,3}\b/g) || [];
+
+    if (nums.length) {
+      console.log(
+        "數字：" + nums.join(", ")
+      );
+    }
+  });
+
+  console.log("");
+  console.log("================================");
+  console.log("🔬 特殊欄位候選");
+  console.log("================================");
+
+  latest.cells.forEach((cell) => {
+
+    // 排除期號欄
+    if (cell.className.includes("BPeriod")) {
+      return;
+    }
+
+    // 排除裝 20 顆號碼的大欄
+    if (cell.raw.includes("<div")) {
+      return;
+    }
+
+    const value = cell.text.trim();
+
+    if (
+      value &&
+      value.length <= 10
+    ) {
+      console.log(
+        `👉 TD[${cell.index}] ` +
+        `class="${cell.className}" ` +
+        `值="${value}"`
+      );
+    }
+  });
+
+  console.log("");
+  console.log("================================");
+  console.log("🔥 最近 12 期簡表");
+  console.log("================================");
+
+  parsed.slice(0, 12).forEach((r, i) => {
+
+    console.log("");
+    console.log(
+      `#${i + 1} ${r.time} | ${r.period}`
     );
 
     console.log(
-      `Bf21b：${item.bf21b || "-"}`
+      "20顆：" +
+      r.bingoNumbers
+        .map(n => String(n).padStart(2, "0"))
+        .join(" ")
     );
 
+    const extras = r.cells
+      .filter(c =>
+        !c.className.includes("BPeriod") &&
+        !c.raw.includes("<div") &&
+        c.text.trim()
+      )
+      .map(c =>
+        `TD${c.index}[${c.className}]=${c.text}`
+      );
+
     console.log(
-      `TD：${JSON.stringify(item.tdValues)}`
+      "其他欄位：" +
+      (extras.length
+        ? extras.join(" | ")
+        : "無")
     );
   });
 
   console.log("");
-  console.log("--------------------------------");
-
-  // =====================================
-  // 如果仍然沒有解析到
-  // 自動輸出診斷資料
-  // =====================================
-
-  if (results.length === 0) {
-    console.log("");
-    console.log("⚠️ 有找到開獎頁，但解析為 0");
-    console.log("輸出前 30 個 TR 供診斷：");
-
-    rows.slice(0, 30).forEach(
-      (row, i) => {
-        console.log(
-          `TR ${i + 1}: ${cleanText(row[0]).slice(0, 500)}`
-        );
-      }
-    );
-  }
+  console.log("================================");
+  console.log("✅ v11 診斷完成");
+  console.log("================================");
 }
 
-main().catch((error) => {
-  console.error("");
-  console.error("❌ Scanner 發生錯誤");
-  console.error(error);
-  process.exit(1);
+main().catch((err) => {
+  console.error("❌ Scanner Error");
+  console.error(err);
+  process.exitCode = 1;
 });
