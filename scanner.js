@@ -312,6 +312,28 @@ function inspectTables(html) {
     );
   });
 }
+function inspectSuperBall(html) {
+  console.log("");
+  console.log("==============================");
+  console.log("🔴 超級獎號診斷");
+  console.log("==============================");
+
+  const matches = [
+    ...html.matchAll(
+      /<td[^>]*class=["'][^"']*Bf21b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi
+    )
+  ];
+
+  console.log("找到 Bf21b 欄位：" + matches.length);
+
+  matches.slice(0, 20).forEach((m, i) => {
+    const value = cleanText(m[1]);
+
+    console.log(
+      `Bf21b[${i}] = "${value || "(空白)"}"`
+    );
+  });
+}
 async function main() {
   console.log("");
   console.log("==============================");
@@ -351,6 +373,7 @@ async function main() {
 
   findHeaderCandidates(html);
   inspectTables(html);
+  inspectSuperBall(html);
 }
 
 main().catch(err => {
