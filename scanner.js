@@ -312,10 +312,48 @@ function inspectTables(html) {
     );
   });
 }
-
 async function main() {
   console.log("");
-console.log("==============================");
-console.log("=== Bingo A+ 掃描儀 v12 ===");
+  console.log("==============================");
+  console.log("=== Bingo A+ 掃描儀 v13 ===");
+  console.log("==============================");
+
+  const date = taiwanDate();
+
+  console.log("");
+  console.log("📅 台灣日期：" + date);
+
+  const result = await fetchPage(date);
+
+  if (!result || !result.html) {
+    console.log("❌ 抓不到網頁資料");
+    return;
+  }
+
+  const html = result.html;
+
+  console.log("");
+  console.log("✅ 網頁取得成功");
+  console.log("HTML 長度：" + html.length);
+
+  const rows = getBingoRows(html);
+
+  console.log("");
+  console.log("🎯 找到 Bingo 資料列：" + rows.length);
+
+  if (rows.length > 0) {
+    const latest = parseBingoRow(rows[0]);
+
+    if (latest) {
+      printRowStructure(latest);
+    }
+  }
+
+  findHeaderCandidates(html);
+  inspectTables(html);
 }
-main();
+
+main().catch(err => {
+  console.error("❌ 執行錯誤：", err);
+  process.exit(1);
+});
