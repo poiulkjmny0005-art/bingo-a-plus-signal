@@ -30,7 +30,7 @@ function stripTags(text) {
 }
 
 async function main() {
-  const date = taiwanDate();
+  const date = "20261005";
 
   const url =
     `https://lotto.auzo.tw/bingobingo/list_${date}.html`;
