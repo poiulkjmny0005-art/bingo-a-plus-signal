@@ -1,6 +1,5 @@
-// Bingo A+ Scanner v4
-// 測試：直接抓 Bingo 日期型開獎頁面
-// 不再使用 RK.php
+// Bingo A+ Scanner v5
+// Step 2：抓取開獎頁面並尋找「超級獎號」資料
 
 function taiwanDate() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -22,14 +21,13 @@ async function main() {
   const url =
     `https://lotto.auzo.tw/bingobingo/list_${date}.html`;
 
-  console.log("=== Bingo A+ Scanner v4 ===");
+  console.log("=== Bingo A+ Scanner v5 ===");
   console.log("台灣日期：", date);
   console.log("抓取網址：", url);
 
   try {
     const response = await fetch(url, {
       method: "GET",
-      redirect: "manual",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
@@ -42,29 +40,94 @@ async function main() {
 
     console.log("HTTP 狀態：", response.status);
 
-    const location = response.headers.get("location");
-
-    if (location) {
-      console.log("重新導向：", location);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
 
     const html = await response.text();
 
     console.log("HTML 長度：", html.length);
+    console.log("✅ 網頁取得成功");
 
-    if (html.length > 0) {
-      console.log("✅ 成功取得網頁內容");
-      console.log("===== 前 1500 字 =====");
-      console.log(html.slice(0, 1500));
-      console.log("======================");
+    // 移除換行，方便搜尋附近 HTML
+    const cleanHtml = html
+      .replace(/\r/g, "")
+      .replace(/\n/g, " ")
+      .replace(/\t/g, " ");
+
+    // 尋找「超級獎號」
+    const keywords = [
+      "超級獎號",
+      "超級獎",
+      "超級",
+      "猜大小",
+      "猜單雙"
+    ];
+
+    console.log("");
+    console.log("===== 開始搜尋關鍵字 =====");
+
+    let foundAnything = false;
+
+    for (const keyword of keywords) {
+      let start = 0;
+      let count = 0;
+
+      while (true) {
+        const index = cleanHtml.indexOf(keyword, start);
+
+        if (index === -1) break;
+
+        foundAnything = true;
+        count++;
+
+        const from = Math.max(0, index - 500);
+        const to = Math.min(
+          cleanHtml.length,
+          index + keyword.length + 800
+        );
+
+        console.log("");
+        console.log(
+          `===== ${keyword} 第 ${count} 個位置 =====`
+        );
+
+        console.log(cleanHtml.slice(from, to));
+
+        console.log(
+          `===== ${keyword} 第 ${count} 個位置結束 =====`
+        );
+
+        start = index + keyword.length;
+
+        // 每個關鍵字最多顯示前 5 個，
+        // 避免 GitHub log 太長
+        if (count >= 5) {
+          console.log(
+            `⚠️ ${keyword} 超過 5 個結果，暫停輸出`
+          );
+          break;
+        }
+      }
+
+      console.log(
+        `搜尋「${keyword}」：找到 ${count} 個位置`
+      );
+    }
+
+    console.log("");
+    console.log("===== 搜尋完成 =====");
+
+    if (!foundAnything) {
+      console.log("⚠️ 暫時沒有找到超級獎號文字");
+      console.log("下一步將改用 HTML 結構解析");
     } else {
-      console.log("❌ 網頁內容是空的");
+      console.log("✅ 找到相關資料");
     }
 
   } catch (error) {
-    console.error("❌ 抓取失敗");
+    console.error("❌ Scanner 發生錯誤");
     console.error(error);
-
     process.exitCode = 1;
   }
 }
