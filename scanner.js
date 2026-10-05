@@ -315,6 +315,5 @@ function inspectTables(html) {
 
 async function main() {
   console.log("");
-  console.log("================================");
-  console.log("=== Bingo A+ Scanner v12 ===");
-  console.log("=== 欄位名稱對照版
+console.log("==============================");
+console.log("=== Bingo A+ 掃描儀 v12 ===");
