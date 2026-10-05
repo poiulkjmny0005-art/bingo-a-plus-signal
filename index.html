@@ -265,6 +265,39 @@ function updateClock() {
 
 updateClock();
 setInterval(updateClock, 1000);
+  async function loadSignal() {
+  try {
+    const res = await fetch("/api/signal?ts=" + Date.now(), {
+      cache: "no-store"
+    });
+
+    const data = await res.json();
+    const balls = document.querySelectorAll(".ball");
+
+    if (Array.isArray(data.numbers) && data.numbers.length > 0) {
+      balls.forEach((ball, i) => {
+        ball.textContent = data.numbers[i] ?? "--";
+      });
+
+      const waiting = document.querySelector(".waiting");
+      if (waiting) {
+        waiting.textContent =
+          data.level === "A+"
+            ? "🔥 A+ 強訊號"
+            : "等待 A+ 強訊號";
+      }
+    } else {
+      balls.forEach(ball => {
+        ball.textContent = "--";
+      });
+    }
+  } catch (err) {
+    console.log("Signal API error:", err);
+  }
+}
+
+loadSignal();
+setInterval(loadSignal, 5000);
 </script>
 
 </body>
