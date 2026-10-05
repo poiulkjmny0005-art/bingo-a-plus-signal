@@ -48,6 +48,20 @@ app.post("/api/signal", (req, res) => {
     signal: latestSignal
   });
 });
+// ===== Scanner 測試 =====
+app.get("/api/test-signal", (req, res) => {
+  latestSignal = {
+    time: new Date().toISOString(),
+    numbers: ["23", "31", "54", "62"],
+    level: "A+"
+  };
+
+  res.json({
+    ok: true,
+    message: "A+ 測試訊號已建立",
+    signal: latestSignal
+  });
+});
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
