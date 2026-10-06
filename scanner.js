@@ -82,6 +82,39 @@ async function fetchPage(date) {
     html
   };
 }
+async function fetchRKPage() {
+  const url = "https://lotto.auzo.tw/RK.php";
+
+  console.log("");
+  console.log("🔴 開始抓 RK.php");
+  console.log("網址：" + url);
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)",
+      "Accept":
+        "text/html,application/xhtml+xml"
+    }
+  });
+
+  console.log("RK HTTP：" + response.status);
+
+  if (!response.ok) {
+    console.log("❌ RK.php 抓取失敗");
+    return null;
+  }
+
+  const html = await response.text();
+
+  console.log("✅ RK.php 抓取成功");
+  console.log("RK HTML 長度：" + html.length);
+
+  return {
+    url,
+    html
+  };
+}
 
 function getBingoRows(html) {
   return (
