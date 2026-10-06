@@ -83,11 +83,14 @@ async function fetchPage(date) {
   };
 }
 async function fetchRKPage() {
-  const url = "https://lotto.auzo.tw/RK.php";
+  const targetUrl = "https://lotto.auzo.tw/RK.php";
+  const url =
+    "https://getip.auzo.tw/get_real_ip.php?url=" +
+    encodeURIComponent(targetUrl);
 
   console.log("");
   console.log("🔴 開始抓 RK.php");
-  console.log("網址：" + url);
+  console.log("轉接網址：" + url);
 
   const response = await fetch(url, {
     redirect: "manual",
@@ -100,17 +103,15 @@ async function fetchRKPage() {
   });
 
   console.log("RK HTTP：" + response.status);
-  console.log("RK Location：" + response.headers.get("location"));
-
-  if (!response.ok) {
-    console.log("❌ RK.php 抓取失敗");
-    return null;
-  }
+  console.log(
+    "RK Location：" + (response.headers.get("location") || "(沒有)")
+  );
 
   const html = await response.text();
 
-  console.log("✅ RK.php 抓取成功");
-  console.log("RK HTML 長度：" + html.length);
+  console.log("RK 回傳長度：" + html.length);
+  console.log("RK 前300字：");
+  console.log(html.slice(0, 300));
 
   return {
     url,
