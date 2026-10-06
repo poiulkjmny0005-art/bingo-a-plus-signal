@@ -90,6 +90,7 @@ async function fetchRKPage() {
   console.log("網址：" + url);
 
   const response = await fetch(url, {
+    redirect: "manual",
     headers: {
       "User-Agent":
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)",
