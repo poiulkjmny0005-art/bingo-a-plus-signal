@@ -351,33 +351,58 @@ function inspectTables(html) {
 function inspectSuperBall(html) {
   console.log("");
   console.log("==============================");
-  console.log("🎯 自動辨識超級獎號");
+  console.log("🎯 自動辨識超級獎號 + 期號 + 時間");
   console.log("==============================");
 
-  // 已驗證：
-  // 115056434 / 23:55 / 超級獎號 09
-  // HTML：<div class="brns">09</div>
-
-  const matches = [
+  // 找出每一期完整的 <tr class="bingo_row">...</tr>
+  const rowMatches = [
     ...html.matchAll(
-      /<div[^>]*class=["'][^"']*\bbrns\b[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi
+      /<tr[^>]*class=["'][^"']*\bbingo_row\b[^"']*["'][^>]*>([\s\S]*?)<\/tr>/gi
     )
   ];
 
-  console.log("找到 brns 數量：" + matches.length);
+  console.log("找到 bingo_row 數量：" + rowMatches.length);
 
-  matches.slice(0, 20).forEach((m, i) => {
-    const number = String(m[1]).padStart(2, "0");
-
-    console.log(
-      `🎯 超級獎號候選[${i + 1}] = ${number} | class=brns`
-    );
-  });
-
-  if (matches.length === 0) {
-    console.log("⚠️ 沒找到 class=brns");
+  if (rowMatches.length === 0) {
+    console.log("⚠️ 找不到 bingo_row");
+    return;
   }
 
+  let successCount = 0;
+
+  rowMatches.slice(0, 20).forEach((m, i) => {
+    const rowHtml = m[1];
+
+    // 抓期號 + 時間
+    const periodMatch = rowHtml.match(
+      /class=["'][^"']*\bBPeriod\b[^"']*["'][^>]*>\s*<b>(\d+)<\/b>\s*<br\s*\/?>\s*(\d{1,2}:\d{2})/i
+    );
+
+    // 抓這一期 class="brns" 的號碼
+    const superMatch = rowHtml.match(
+      /<div[^>]*class=["'][^"']*\bbrns\b[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/i
+    );
+
+    if (!periodMatch || !superMatch) {
+      return;
+    }
+
+    const period = periodMatch[1];
+    const time = periodMatch[2];
+    const superBall = String(superMatch[1]).padStart(2, "0");
+
+    successCount++;
+
+    console.log("");
+    console.log(`🎯 第 ${successCount} 筆`);
+    console.log(`期號：${period}`);
+    console.log(`時間：${time}`);
+    console.log(`超級獎號：${superBall}`);
+    console.log("------------------------------");
+  });
+
+  console.log("");
+  console.log("成功配對數量：" + successCount);
   console.log("==============================");
 }
 function deepSearchSuperBall(html) {
