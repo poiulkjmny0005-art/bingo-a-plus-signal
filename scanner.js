@@ -443,10 +443,22 @@ function inspectSuperBall(html) {
     }
 
     if (!superBall) {
-      console.log("");
-      console.log(`⚠️ ${period} ${time} 找不到超級獎號`);
-      return;
-    }
+  console.log("");
+  console.log(`⚠️ ${period} ${time} 找不到超級獎號`);
+  console.log("🔍 本期所有號碼 + class：");
+
+  numberDivs.forEach((item, i) => {
+    const className = item[1].trim();
+    const number = String(item[2]).padStart(2, "0");
+
+    console.log(
+      `[${i + 1}] 號碼=${number} | class=${className}`
+    );
+  });
+
+  console.log("----------------------------");
+  return;
+}
 
     successCount++;
 
