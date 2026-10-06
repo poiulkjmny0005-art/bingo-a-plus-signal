@@ -447,9 +447,9 @@ console.log("class: " + superClass);
 console.log("--------------------------");
   }
   console.log("");
-  console.log("============================");
-  console.log("成功抓到超級獎號：" + successCount + " 筆");
-  console.log("============================");
+console.log("============================");
+console.log("成功抓到超級獎號：" + successCount + " 筆");
+console.log("============================");
 });
   }
 function deepSearchSuperBall(html) {
