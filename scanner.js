@@ -439,12 +439,12 @@ if (time === "23:55") {
     successCount++;
 
     console.log("");
-    console.log(`🎯 第 ${successCount} 筆`);
-    console.log(`期號：${period}`);
-    console.log(`時間：${time}`);
-    console.log(`超級獎號：${superBall}`);
-    console.log(`class：${superClass}`);
-    console.log("----------------------------");
+console.log("🎯 第 " + successCount + " 筆");
+console.log("期號: " + period);
+console.log("時間: " + time);
+console.log("超級獎號: " + superBall);
+console.log("class: " + superClass);
+console.log("--------------------------");
   }
   console.log("");
   console.log("============================");
