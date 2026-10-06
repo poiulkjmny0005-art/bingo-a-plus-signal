@@ -385,34 +385,36 @@ function inspectSuperBall(html) {
     const period = periodMatch[1];
     const time = periodMatch[2];
 
-    // ⭐ 關鍵：
-    // 超級獎號的 class 最後會有 s
-    // 例如：
-    // brns
-    // bbns
-    // bblps
-    // bbrps
-    // bbbps
-    const numberDivs = [
-      ...rowHtml.matchAll(
-        /<div[^>]*class=["']([^"']+)["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi
-      )
-    ];
+    // ⭐ 超級獎號辨識
+// 已知網站會使用 brns / bbns / bb1ps / bbrps / bbbps 等標記
+// 不再假設「class 最後一個字一定是 s」
 
-    let superBall = null;
-    let superClass = null;
+const numberDivs = [
+  ...rowHtml.matchAll(
+    /<div[^>]*class=["']([^"']+)["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi
+  )
+];
 
-    for (const item of numberDivs) {
-      const className = item[1].trim();
-      const number = String(item[2]).padStart(2, "0");
+let superBall = null;
+let superClass = null;
 
-      // 🎯 class 最後是 s = 超級獎號
-      if (/s$/i.test(className)) {
-        superBall = number;
-        superClass = className;
-        break;
-      }
-    }
+for (const item of numberDivs) {
+  const className = item[1].trim();
+  const number = String(item[2]).padStart(2, "0");
+
+  // 已驗證的超級獎號 class
+  if (
+    className === "brns" ||
+    className === "bbns" ||
+    className === "bb1ps" ||
+    className === "bbrps" ||
+    className === "bbbps"
+  ) {
+    superBall = number;
+    superClass = className;
+    break;
+  }
+}
 
     if (!superBall) {
       console.log("");
