@@ -463,12 +463,28 @@ async function main() {
   console.log("🎯 找到 Bingo 資料列：" + rows.length);
 
   if (rows.length > 0) {
-    const latest = parseBingoRow(rows[0]);
+  const latest = parseBingoRow(rows[0]);
 
-    if (latest) {
-      printRowStructure(latest);
-    }
+  if (latest) {
+    printRowStructure(latest);
+
+    console.log("");
+    console.log("==============================");
+    console.log("🔬 最新一期號碼 CLASS");
+    console.log("==============================");
+
+    const cells = getCells(rows[0]);
+
+    cells.forEach((cell, i) => {
+      console.log(
+        "[" + i + "] " +
+        (cell.text || "(空白)") +
+        " → class = " +
+        (cell.className || "(無)")
+      );
+    });
   }
+}
 
   findHeaderCandidates(html);
   inspectTables(html);
