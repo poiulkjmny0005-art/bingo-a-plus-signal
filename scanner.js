@@ -351,24 +351,34 @@ function inspectTables(html) {
 function inspectSuperBall(html) {
   console.log("");
   console.log("==============================");
-  console.log("🔴 超級獎號診斷");
+  console.log("🎯 自動辨識超級獎號");
   console.log("==============================");
+
+  // 已驗證：
+  // 115056434 / 23:55 / 超級獎號 09
+  // HTML：<div class="brns">09</div>
 
   const matches = [
     ...html.matchAll(
-      /<td[^>]*class=["'][^"']*Bf21b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi
+      /<div[^>]*class=["'][^"']*\bbrns\b[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi
     )
   ];
 
-  console.log("找到 Bf21b 欄位：" + matches.length);
+  console.log("找到 brns 數量：" + matches.length);
 
   matches.slice(0, 20).forEach((m, i) => {
-    const value = cleanText(m[1]);
+    const number = String(m[1]).padStart(2, "0");
 
     console.log(
-      `Bf21b[${i}] = "${value || "(空白)"}"`
+      `🎯 超級獎號候選[${i + 1}] = ${number} | class=brns`
     );
   });
+
+  if (matches.length === 0) {
+    console.log("⚠️ 沒找到 class=brns");
+  }
+
+  console.log("==============================");
 }
 function deepSearchSuperBall(html) {
   console.log("");
