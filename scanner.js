@@ -420,28 +420,23 @@ function inspectSuperBall(html) {
        * 同時兼容同系列 class + s。
        */
 
-      const knownSuperClasses = [
+     const knownSuperClasses = [
   "brns",
   "bbns",
   "br1ps",
   "bb1ps",
-  "bb1ps",
+  "bblps",
   "bbrps",
   "bbbps"
 ];
 
-      const isKnownSuper =
-        knownSuperClasses.includes(className.toLowerCase());
+const normalizedClass = className.toLowerCase();
 
-      const isCompatibleSuper =
-     /^(?:brn|bbn|br1p|bb1p|bblp|bbrp|bbbp)s$/i
-
-      if (isKnownSuper || isCompatibleSuper) {
-        superBall = number;
-        superClass = className;
-        break;
-      }
-    }
+if (knownSuperClasses.includes(normalizedClass)) {
+  superBall = number;
+  superClass = className;
+  break;
+}
 
     if (!superBall) {
   console.log("");
