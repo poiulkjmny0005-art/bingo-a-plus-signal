@@ -351,10 +351,10 @@ function inspectTables(html) {
 function inspectSuperBall(html) {
   console.log("");
   console.log("==============================");
-  console.log("🎯 自動辨識超級獎號 + 期號 + 時間");
+  console.log("🎯 全期超級獎號診斷");
   console.log("==============================");
 
-  // 找出每一期完整的 <tr class="bingo_row">...</tr>
+  // 找出所有開獎資料列
   const rowMatches = [
     ...html.matchAll(
       /<tr[^>]*class=["'][^"']*\bbingo_row\b[^"']*["'][^>]*>([\s\S]*?)<\/tr>/gi
@@ -368,9 +368,8 @@ function inspectSuperBall(html) {
     return;
   }
 
-  let successCount = 0;
-
-  rowMatches.slice(0, 20).forEach((m, i) => {
+  // 先檢查最新 12 期
+  rowMatches.slice(0, 12).forEach((m, rowIndex) => {
     const rowHtml = m[1];
 
     // 抓期號 + 時間
@@ -378,31 +377,64 @@ function inspectSuperBall(html) {
       /class=["'][^"']*\bBPeriod\b[^"']*["'][^>]*>\s*<b>(\d+)<\/b>\s*<br\s*\/?>\s*(\d{1,2}:\d{2})/i
     );
 
-    // 抓這一期 class="brns" 的號碼
-    const superMatch = rowHtml.match(
-      /<div[^>]*class=["'][^"']*\bbrns\b[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/i
-    );
-
-    if (!periodMatch || !superMatch) {
+    if (!periodMatch) {
       return;
     }
 
     const period = periodMatch[1];
     const time = periodMatch[2];
-    const superBall = String(superMatch[1]).padStart(2, "0");
-
-    successCount++;
 
     console.log("");
-    console.log(`🎯 第 ${successCount} 筆`);
+    console.log("==============================");
+    console.log(`🔎 第 ${rowIndex + 1} 列`);
     console.log(`期號：${period}`);
     console.log(`時間：${time}`);
-    console.log(`超級獎號：${superBall}`);
-    console.log("------------------------------");
+    console.log("==============================");
+
+    // 抓該期所有號碼 DIV，同時保留 class
+    const balls = [
+      ...rowHtml.matchAll(
+        /<div([^>]*)>\s*(\d{1,2})\s*<\/div>/gi
+      )
+    ];
+
+    console.log("找到號碼 DIV：" + balls.length);
+
+    balls.forEach((ball, i) => {
+      const attrs = ball[1] || "";
+      const number = String(ball[2]).padStart(2, "0");
+
+      const classMatch = attrs.match(
+        /class=["']([^"']+)["']/i
+      );
+
+      const className = classMatch
+        ? classMatch[1].trim()
+        : "(無)";
+
+      console.log(
+        `[${i + 1}] 號碼=${number} | class=${className}`
+      );
+    });
+
+    // 已知 brns 候選
+    const brnsMatch = rowHtml.match(
+      /<div[^>]*class=["'][^"']*\bbrns\b[^"']*["'][^>]*>\s*(\d{1,2})\s*<\/div>/i
+    );
+
+    if (brnsMatch) {
+      console.log(
+        "🎯 brns候選：" +
+        String(brnsMatch[1]).padStart(2, "0")
+      );
+    } else {
+      console.log("⚠️ 本期沒有 brns");
+    }
   });
 
   console.log("");
-  console.log("成功配對數量：" + successCount);
+  console.log("==============================");
+  console.log("🔎 12期診斷完成");
   console.log("==============================");
 }
 function deepSearchSuperBall(html) {
