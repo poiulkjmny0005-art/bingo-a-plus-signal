@@ -425,7 +425,7 @@ function inspectSuperBall(html) {
   "bbns",
   "br1ps",
   "bb1ps",
-  "bblps",
+  "bb1ps",
   "bbrps",
   "bbbps"
 ];
