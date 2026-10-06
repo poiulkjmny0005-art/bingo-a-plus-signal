@@ -420,22 +420,13 @@ function inspectSuperBall(html) {
        * 同時兼容同系列 class + s。
        */
 
-     const knownSuperClasses = [
-  "brns",
-  "bbns",
-  "br1ps",
-  "bb1ps",
-  "bblps",
-  "bbrps",
-  "bbbps"
-];
+     const normalizedClass = className.toLowerCase();
 
-const normalizedClass = className.toLowerCase();
-
-if (knownSuperClasses.includes(normalizedClass)) {
-  superBall = number;
-  superClass = className;
-  break;
+// class 最後有 s = 超級獎號
+if (normalizedClass.endsWith("s")) {
+    superBall = number;
+    superClass = className;
+    break;
 }
 
     if (!superBall) {
