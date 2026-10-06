@@ -486,7 +486,7 @@ if (time === "23:55") {
   console.log("============================");
   console.log("成功抓到超級獎號：" + successCount + " 筆");
   console.log("============================");
-}
+});
 function deepSearchSuperBall(html) {
   console.log("");
   console.log("==============================");
