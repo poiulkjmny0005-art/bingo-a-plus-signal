@@ -434,7 +434,7 @@ function inspectSuperBall(html) {
         knownSuperClasses.includes(className.toLowerCase());
 
       const isCompatibleSuper =
-        /^(?:brn|bbn|bb1p|bblp|bbrp|bbbp)s$/i.test(className);
+        /^(?:brn|bbn|br1p|bb1p|bblp|bbrp|bbbp)s$/i.test(className);
 
       if (isKnownSuper || isCompatibleSuper) {
         superBall = number;
