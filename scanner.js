@@ -407,6 +407,11 @@ async function main() {
   findHeaderCandidates(html);
   inspectTables(html);
   inspectSuperBall(html);
+  const rkResult = await fetchRKPage();
+
+if (rkResult && rkResult.html) {
+  inspectSuperBall(rkResult.html);
+}
 }
 
 main().catch(err => {
