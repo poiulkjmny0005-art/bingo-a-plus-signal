@@ -421,13 +421,14 @@ function inspectSuperBall(html) {
        */
 
       const knownSuperClasses = [
-        "brns",
-        "bbns",
-        "bb1ps",
-        "bblps",
-        "bbrps",
-        "bbbps"
-      ];
+  "brns",
+  "bbns",
+  "br1ps",
+  "bb1ps",
+  "bblps",
+  "bbrps",
+  "bbbps"
+];
 
       const isKnownSuper =
         knownSuperClasses.includes(className.toLowerCase());
