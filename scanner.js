@@ -433,6 +433,53 @@ function deepSearchSuperBall(html) {
   console.log("");
   console.log("🔎 深度搜尋完成");
 }
+function inspectLatestBallHtml(html) {
+  console.log("");
+  console.log("==============================");
+  console.log("🔬 最新一期 20 顆原始 HTML");
+  console.log("==============================");
+
+  const rows = getBingoRows(html);
+
+  if (rows.length === 0) {
+    console.log("❌ 找不到 Bingo 資料列");
+    return;
+  }
+
+  const rowHtml = rows[0];
+
+  const divRegex =
+    /<div\b([^>]*)>([\s\S]*?)<\/div>/gi;
+
+  let m;
+  let count = 0;
+
+  while ((m = divRegex.exec(rowHtml)) !== null) {
+    const attrs = m[1] || "";
+    const value = cleanText(m[2]);
+
+    if (!/^\d{1,2}$/.test(value)) {
+      continue;
+    }
+
+    count++;
+
+    console.log("");
+    console.log(
+      "[" + count + "] 號碼 = " + value
+    );
+    console.log(
+      "    DIV屬性 = " + (attrs.trim() || "(無)")
+    );
+    console.log(
+      "    原始HTML = " + m[0]
+    );
+  }
+
+  console.log("");
+  console.log("共找到 " + count + " 個號碼 DIV");
+  console.log("==============================");
+}
 async function main() {
   console.log("");
   console.log("==============================");
@@ -490,6 +537,7 @@ async function main() {
   inspectTables(html);
   inspectSuperBall(html);
   deepSearchSuperBall(html);
+  inspectLatestBallHtml(html);
 }
 
 main().catch(err => {
