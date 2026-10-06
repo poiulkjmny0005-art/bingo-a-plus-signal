@@ -460,10 +460,10 @@ function inspectSuperBall(html) {
   console.log("----------------------------");
   return;
 }
-    // 暫時檢查 23:15 的 20 顆號碼 + class
+    // 暫時檢查 23:10 的 20 顆號碼 + class
 if (time === "23:10") {
   console.log("");
-  console.log("🔎 23:15 完整 20 顆號碼 + class");
+  console.log("🔎 23:10 完整 20 顆號碼 + class");
 
   numberDivs.forEach((item, i) => {
     const className = item[1].trim();
