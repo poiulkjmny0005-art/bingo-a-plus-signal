@@ -481,8 +481,7 @@ if (time === "23:55") {
     console.log(`超級獎號：${superBall}`);
     console.log(`class：${superClass}`);
     console.log("----------------------------");
-  });
-
+  }
   console.log("");
   console.log("============================");
   console.log("成功抓到超級獎號：" + successCount + " 筆");
