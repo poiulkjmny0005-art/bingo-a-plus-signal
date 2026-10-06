@@ -461,7 +461,7 @@ function inspectSuperBall(html) {
   return;
 }
     // 暫時檢查 23:15 的 20 顆號碼 + class
-if (time === "23:15") {
+if (time === "23:10") {
   console.log("");
   console.log("🔎 23:15 完整 20 顆號碼 + class");
 
