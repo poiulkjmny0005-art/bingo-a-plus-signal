@@ -370,8 +370,12 @@ function inspectSuperBall(html) {
 
   let successCount = 0;
 
-  rowMatches.slice(0, 20).forEach((m) => {
+  rowMatches.slice(0, 1).forEach((m) => {
     const rowHtml = m[1];
+    console.log("");
+console.log("🔥 第一筆 bingo_row 完整 HTML");
+console.log(rowHtml);
+console.log("🔥 第一筆結束");
 
     // 期號 + 時間
     const periodMatch = rowHtml.match(
