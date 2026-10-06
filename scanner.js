@@ -100,6 +100,7 @@ async function fetchRKPage() {
   });
 
   console.log("RK HTTP：" + response.status);
+  console.log("RK Location：" + response.headers.get("location"));
 
   if (!response.ok) {
     console.log("❌ RK.php 抓取失敗");
