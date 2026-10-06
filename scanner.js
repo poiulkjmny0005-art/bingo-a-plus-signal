@@ -397,43 +397,27 @@ function inspectSuperBall(html) {
     let superClass = null;
 
     for (const item of numberDivs) {
-      const className = item[1].trim();
-      const number = String(item[2]).padStart(2, "0");
+    const className = String(item[1] || "").trim().toLowerCase();
+    const number = String(item[2] || "").trim().padStart(2, "0");
 
-      /*
-       * 已從實際 HTML 確認：
-       *
-       * 一般號碼可能為：
-       * brn
-       * bbn
-       * bblp
-       * bbrp
-       *
-       * 超級獎號則使用：
-       * brns
-       * bbns
-       * bb1ps / bblps
-       * bbrps
-       * bbbps
-       *
-       * 核心：先接受已知超級獎號 class，
-       * 同時兼容同系列 class + s。
-       */
+    // 奧索超級獎號的 class 會以 s 結尾
+    const isSuperBall = /s$/i.test(className);
 
-     const normalizedClass = className
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+    console.log(
+        `DEBUG 號碼=${number} class=[${className}] super=${isSuperBall}`
+    );
 
-console.log(
-    `DEBUG 號碼=${number} class=[${className}] normalized=[${normalizedClass}]`
-);
+    if (isSuperBall) {
+        superBall = number;
+        superClass = className;
 
-if (normalizedClass.endsWith("s")) {
-    superBall = number;
-    superClass = className;
-    break;
+        console.log(
+            `✅ 找到超級獎號：${superBall} | class=${superClass}`
+        );
+
+        break;
+    }
 }
-
     if (!superBall) {
   console.log("");
   console.log(`⚠️ ${period} ${time} 找不到超級獎號`);
