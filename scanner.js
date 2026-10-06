@@ -420,9 +420,14 @@ function inspectSuperBall(html) {
        * 同時兼容同系列 class + s。
        */
 
-     const normalizedClass = className.toLowerCase();
+     const normalizedClass = className
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 
-// class 最後有 s = 超級獎號
+console.log(
+    `DEBUG 號碼=${number} class=[${className}] normalized=[${normalizedClass}]`
+);
+
 if (normalizedClass.endsWith("s")) {
     superBall = number;
     superClass = className;
