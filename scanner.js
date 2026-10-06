@@ -370,6 +370,69 @@ function inspectSuperBall(html) {
     );
   });
 }
+function deepSearchSuperBall(html) {
+  console.log("");
+  console.log("==============================");
+  console.log("🔎 深度搜尋超級獎號");
+  console.log("==============================");
+
+  const keywords = [
+    "超級獎號",
+    "超級獎",
+    "超級號",
+    "Super",
+    "super"
+  ];
+
+  let found = false;
+
+  for (const keyword of keywords) {
+    let start = 0;
+
+    while (true) {
+      const index = html.indexOf(keyword, start);
+
+      if (index === -1) break;
+
+      found = true;
+
+      const from = Math.max(0, index - 500);
+      const to = Math.min(html.length, index + 1000);
+
+      console.log("");
+      console.log("🎯 找到關鍵字：" + keyword);
+      console.log("HTML位置：" + index);
+      console.log("----- 前後 HTML -----");
+      console.log(html.slice(from, to));
+      console.log("---------------------");
+
+      start = index + keyword.length;
+    }
+  }
+
+  // 再找可能與獎號有關的 class
+  const classRegex =
+    /class=["'][^"']*(?:super|special|award|ball|Bf21b)[^"']*["']/gi;
+
+  const classes = html.match(classRegex) || [];
+
+  console.log("");
+  console.log("🎯 可疑 class 數量：" + classes.length);
+
+  const uniqueClasses = [...new Set(classes)];
+
+  uniqueClasses.slice(0, 50).forEach((item, i) => {
+    console.log("class[" + i + "] = " + item);
+  });
+
+  if (!found) {
+    console.log("");
+    console.log("⚠️ HTML 裡沒有直接找到「超級獎號」文字");
+  }
+
+  console.log("");
+  console.log("🔎 深度搜尋完成");
+}
 async function main() {
   console.log("");
   console.log("==============================");
@@ -410,11 +473,7 @@ async function main() {
   findHeaderCandidates(html);
   inspectTables(html);
   inspectSuperBall(html);
-  const rkResult = await fetchRKPage();
-
-if (rkResult && rkResult.html) {
-  inspectSuperBall(rkResult.html);
-}
+  deepSearchSuperBall(html);
 }
 
 main().catch(err => {
