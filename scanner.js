@@ -370,16 +370,13 @@ function inspectSuperBall(html) {
 
   let successCount = 0;
 
-  rowMatches.slice(0, 1).forEach((m) => {
+  // 最新 12 期
+  rowMatches.slice(0, 12).forEach((m) => {
     const rowHtml = m[1];
-    console.log("");
-console.log("🔥 第一筆 bingo_row 完整 HTML");
-console.log(rowHtml);
-console.log("🔥 第一筆結束");
 
-    // 期號 + 時間
+    // 抓期號 + 時間
     const periodMatch = rowHtml.match(
-      /class=["'][^"']*\bBPeriod\b[^"']*["'][^>]*>\s*(\d+)\s+(\d{1,2}:\d{2})/i
+      /class=["'][^"']*\bBPeriod\b[^"']*["'][^>]*>\s*(?:<b>)?\s*(\d+)\s*(?:<\/b>)?\s*<br\s*\/?>\s*(\d{1,2}:\d{2})/i
     );
 
     if (!periodMatch) {
@@ -389,36 +386,61 @@ console.log("🔥 第一筆結束");
     const period = periodMatch[1];
     const time = periodMatch[2];
 
-    // ⭐ 超級獎號辨識
-// 已知網站會使用 brns / bbns / bb1ps / bbrps / bbbps 等標記
-// 不再假設「class 最後一個字一定是 s」
+    // 抓所有開獎號碼 DIV + class
+    const numberDivs = [
+      ...rowHtml.matchAll(
+        /<div[^>]*class=["']([^"']+)["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi
+      )
+    ];
 
-const numberDivs = [
-  ...rowHtml.matchAll(
-    /<div[^>]*class=["']([^"']+)["'][^>]*>\s*(\d{1,2})\s*<\/div>/gi
-  )
-];
+    let superBall = null;
+    let superClass = null;
 
-let superBall = null;
-let superClass = null;
+    for (const item of numberDivs) {
+      const className = item[1].trim();
+      const number = String(item[2]).padStart(2, "0");
 
-for (const item of numberDivs) {
-  const className = item[1].trim();
-  const number = String(item[2]).padStart(2, "0");
+      /*
+       * 已從實際 HTML 確認：
+       *
+       * 一般號碼可能為：
+       * brn
+       * bbn
+       * bblp
+       * bbrp
+       *
+       * 超級獎號則使用：
+       * brns
+       * bbns
+       * bb1ps / bblps
+       * bbrps
+       * bbbps
+       *
+       * 核心：先接受已知超級獎號 class，
+       * 同時兼容同系列 class + s。
+       */
 
-  // 已驗證的超級獎號 class
-  if (
-    className === "brns" ||
-    className === "bbns" ||
-    className === "bb1ps" ||
-    className === "bbrps" ||
-    className === "bbbps"
-  ) {
-    superBall = number;
-    superClass = className;
-    break;
-  }
-}
+      const knownSuperClasses = [
+        "brns",
+        "bbns",
+        "bb1ps",
+        "bblps",
+        "bbrps",
+        "bbbps"
+      ];
+
+      const isKnownSuper =
+        knownSuperClasses.includes(className.toLowerCase());
+
+      const isCompatibleSuper =
+        /^(?:brn|bbn|bb1p|bblp|bbrp|bbbp)s$/i.test(className);
+
+      if (isKnownSuper || isCompatibleSuper) {
+        superBall = number;
+        superClass = className;
+        break;
+      }
+    }
 
     if (!superBall) {
       console.log("");
@@ -438,6 +460,7 @@ for (const item of numberDivs) {
   });
 
   console.log("");
+  console.log("============================");
   console.log("成功抓到超級獎號：" + successCount + " 筆");
   console.log("============================");
 }
