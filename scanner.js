@@ -587,6 +587,173 @@ function inspectLatestBallHtml(html) {
   console.log("共找到 " + count + " 個號碼 DIV");
   console.log("==============================");
 }
+// ========================================
+// A+ 訊號核心 v1
+// 目的：從 Bingo 資料列抓出超級獎號
+//      統計近期熱度並產生 A+ 候選號
+// ========================================
+
+function buildAPlusSignal(html) {
+  console.log("");
+  console.log("================================");
+  console.log("🔥 A+ 訊號分析");
+  console.log("================================");
+
+  const rows = getBingoRows(html);
+
+  if (!rows || rows.length === 0) {
+    console.log("❌ 沒有 Bingo 資料");
+    return;
+  }
+
+  const history = [];
+
+  // 最多分析最近 100 期
+  const limit = Math.min(rows.length, 100);
+
+  for (let i = 0; i < limit; i++) {
+    const rowHtml = rows[i];
+
+    const cells = getCells(rowHtml);
+
+    if (!cells || cells.length < 2) {
+      continue;
+    }
+
+    const periodCell = cells.find(c =>
+      (c.className || "").includes("BPeriod")
+    );
+
+    if (!periodCell) {
+      continue;
+    }
+
+    const pm = periodCell.text.match(
+      /(\d{8,})\s+(\d{1,2}:\d{2})/
+    );
+
+    if (!pm) {
+      continue;
+    }
+
+    // 找出該期 20 顆球
+    const numberDivs = [
+      ...rowHtml.matchAll(
+        /<div\b([^>]*)>([\s\S]*?)<\/div>/gi
+      )
+    ];
+
+    let superBall = null;
+
+    for (const item of numberDivs) {
+      const attrs = item[1] || "";
+      const number = cleanText(item[2]);
+
+      if (!/^\d{1,2}$/.test(number)) {
+        continue;
+      }
+
+      const className = getClass(attrs);
+
+      // 奧索超級獎號 class 最後會有 s
+      if (/s$/i.test(className)) {
+        superBall = Number(number);
+        break;
+      }
+    }
+
+    if (
+      superBall !== null &&
+      superBall >= 1 &&
+      superBall <= 80
+    ) {
+      history.push({
+        period: pm[1],
+        time: pm[2],
+        number: superBall
+      });
+    }
+  }
+
+  console.log("");
+  console.log("📊 成功取得超級獎號：" + history.length + " 期");
+
+  if (history.length === 0) {
+    console.log("❌ 找不到歷史超級獎號");
+    return;
+  }
+
+  // ==============================
+  // 01～80 建立分數
+  // ==============================
+
+  const scores = {};
+
+  for (let n = 1; n <= 80; n++) {
+    scores[n] = {
+      number: n,
+      count: 0,
+      recent20: 0,
+      recent50: 0,
+      score: 0
+    };
+  }
+
+  history.forEach((item, index) => {
+    const n = item.number;
+
+    scores[n].count++;
+
+    if (index < 20) {
+      scores[n].recent20++;
+      scores[n].score += 5;
+    } else if (index < 50) {
+      scores[n].recent50++;
+      scores[n].score += 3;
+    } else {
+      scores[n].score += 1;
+    }
+  });
+
+  const ranking = Object.values(scores)
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return b.count - a.count;
+    });
+
+  const top12 = ranking.slice(0, 12);
+
+  console.log("");
+  console.log("================================");
+  console.log("🏆 A+ 熱門號 TOP 12");
+  console.log("================================");
+
+  top12.forEach((item, index) => {
+    console.log(
+      String(index + 1).padStart(2, "0") +
+      ". " +
+      String(item.number).padStart(2, "0") +
+      " | 分數=" + item.score +
+      " | 出現=" + item.count
+    );
+  });
+
+  // 前 4 名作為目前 A+ 候選
+  const aPlus = top12
+    .slice(0, 4)
+    .map(item =>
+      String(item.number).padStart(2, "0")
+    );
+
+  console.log("");
+  console.log("================================");
+  console.log("🎯 A+ 候選號");
+  console.log("👉 " + aPlus.join("、"));
+  console.log("================================");
+}
 async function main() {
   console.log("");
   console.log("==============================");
@@ -645,6 +812,7 @@ async function main() {
   inspectSuperBall(html);
   deepSearchSuperBall(html);
   inspectLatestBallHtml(html);
+  buildAPlusSignal(html);
 }
 
 main().catch(err => {
