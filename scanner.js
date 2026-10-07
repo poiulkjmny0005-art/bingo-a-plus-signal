@@ -1058,6 +1058,32 @@ stats[n].gap =
 
     return score;
   },
+    // 1B. HOT 改良版
+HOT_V2: s => {
+  let score = 0;
+
+  // 短中期熱度
+  score += s.last5 * 8;
+  score += s.last10 * 6;
+  score += s.last20 * 3;
+  score += s.last40 * 0.5;
+
+  // 最近有出現，但避免追太熱
+  if (s.last5 === 1) {
+    score += 4;
+  }
+
+  if (s.last5 >= 2) {
+    score -= 8;
+  }
+
+  // 10期有熱度、5期沒有過熱
+  if (s.last10 >= 2 && s.last5 <= 1) {
+    score += 5;
+  }
+
+  return score;
+},
 
 
   // 2. 短線動能
