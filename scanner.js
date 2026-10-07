@@ -1271,10 +1271,21 @@ if (
           avg
         };
       })
-      .sort(
-        (a, b) =>
-          b.rate - a.rate
-      );
+      .sort((a, b) => {
+
+  // ① 先比較 12 期命中率：越高越好
+  if (b.rate !== a.rate) {
+    return b.rate - a.rate;
+  }
+
+  // ② 命中率相同：有命中的模型優先
+  if (a.hits === 0 && b.hits > 0) return 1;
+  if (b.hits === 0 && a.hits > 0) return -1;
+
+  // ③ 命中率相同：平均越早命中越好
+  return a.avg - b.avg;
+
+});
 
 
   summary.forEach((r, index) => {
