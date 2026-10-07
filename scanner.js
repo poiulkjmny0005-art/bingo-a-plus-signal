@@ -1145,9 +1145,9 @@ stats[n].gap =
   const minimumPast = 30;
 
   const maxTests = Math.min(
-    200,
+    500,
     history.length - minimumPast - 12
-  );
+);
 
   for (
     let start = 12;
