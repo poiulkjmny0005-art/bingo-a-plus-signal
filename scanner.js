@@ -418,40 +418,34 @@ function inspectSuperBall(html) {
         break;
     }
 }
-    
-    // 暫時檢查 23:55的 20 顆號碼 + class
+    // 暫時檢查 23:55 的 20 顆號碼 + class
 if (time === "23:55") {
   console.log("");
   console.log("🔎 23:55 完整 20 顆號碼 + class");
 
   numberDivs.forEach((item, i) => {
-    const className = item[1].trim();
-    const number = String(item[2]).padStart(2, "0");
+    const className = String(item[1] || "").trim();
+    const number = String(item[2] || "").trim().padStart(2, "0");
 
     console.log(
       `[${i + 1}] 號碼=${number} | class=${className}`
     );
   });
 
-  console.log("----------------------------");
+  console.log("------------------------");
 }
 
-    successCount++;
+successCount++;
 
-    console.log("");
+console.log("");
 console.log("🎯 第 " + successCount + " 筆");
 console.log("期號: " + period);
 console.log("時間: " + time);
 console.log("超級獎號: " + superBall);
 console.log("class: " + superClass);
-console.log("--------------------------");
-  }
-  console.log("");
-console.log("============================");
-console.log("成功抓到超級獎號：" + successCount + " 筆");
-console.log("============================");
+console.log("------------------------");
 });
-  }
+}
 function deepSearchSuperBall(html) {
   console.log("");
   console.log("==============================");
