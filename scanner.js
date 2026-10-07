@@ -753,6 +753,162 @@ function buildAPlusSignal(html) {
   console.log("🎯 A+ 候選號");
   console.log("👉 " + aPlus.join("、"));
   console.log("================================");
+  // ========================================
+// 一期一顆 × 12期回測 v1
+// ========================================
+
+console.log("");
+console.log("==============================");
+console.log("🧪 一期一顆 × 12期回測");
+console.log("==============================");
+
+// history[0] 是最新一期
+// 因此回測時：
+// 用較舊資料選號，再檢查它後面的 12 期
+
+let testCount = 0;
+let hitCount = 0;
+let missCount = 0;
+let totalHitPeriod = 0;
+
+const maxBackTests = Math.min(50, history.length - 32);
+
+for (let start = 12; start < 12 + maxBackTests; start++) {
+
+  // 只能使用當時已經知道的歷史資料
+  // 避免偷看到未來資料
+  const pastData = history.slice(start, start + 20);
+
+  if (pastData.length < 20) {
+    continue;
+  }
+
+  const tempScores = {};
+
+  for (let n = 1; n <= 80; n++) {
+    tempScores[n] = {
+      number: n,
+      score: 0,
+      count: 0
+    };
+  }
+
+  // 用當時之前 20 期選出最強 1 顆
+  pastData.forEach((item, index) => {
+
+    const n = item.number;
+
+    if (!tempScores[n]) {
+      return;
+    }
+
+    tempScores[n].count++;
+
+    // 越接近當時，權重越高
+    if (index < 5) {
+      tempScores[n].score += 5;
+    } else if (index < 10) {
+      tempScores[n].score += 3;
+    } else {
+      tempScores[n].score += 1;
+    }
+  });
+
+  const pick = Object.values(tempScores)
+    .sort((a, b) => {
+
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return b.count - a.count;
+
+    })[0];
+
+  if (!pick) {
+    continue;
+  }
+
+  // start 前面的 12 筆就是選號之後發生的 12 期
+  const future12 = history.slice(start - 12, start);
+
+  let hitPeriod = 0;
+
+  // history 是新 -> 舊
+  // 所以要反過來才是第1期、第2期...
+  const chronological = [...future12].reverse();
+
+  for (let i = 0; i < chronological.length; i++) {
+
+    if (chronological[i].number === pick.number) {
+      hitPeriod = i + 1;
+      break;
+    }
+
+  }
+
+  testCount++;
+
+  if (hitPeriod > 0) {
+
+    hitCount++;
+    totalHitPeriod += hitPeriod;
+
+    console.log(
+      "✅ #" +
+      testCount +
+      " 選 " +
+      String(pick.number).padStart(2, "0") +
+      " → 第 " +
+      hitPeriod +
+      " 期命中"
+    );
+
+  } else {
+
+    missCount++;
+
+    console.log(
+      "❌ #" +
+      testCount +
+      " 選 " +
+      String(pick.number).padStart(2, "0") +
+      " → 12期未中"
+    );
+
+  }
+}
+
+console.log("");
+console.log("==============================");
+console.log("📊 12期回測結果");
+console.log("==============================");
+
+console.log("回測組數：" + testCount);
+console.log("12期內命中：" + hitCount);
+console.log("12期未命中：" + missCount);
+
+if (testCount > 0) {
+
+  const hitRate = (
+    hitCount / testCount * 100
+  ).toFixed(2);
+
+  console.log("🎯 12期命中率：" + hitRate + "%");
+
+}
+
+if (hitCount > 0) {
+
+  const avgHit = (
+    totalHitPeriod / hitCount
+  ).toFixed(2);
+
+  console.log("⏱️ 平均第 " + avgHit + " 期命中");
+
+}
+
+console.log("==============================");
 }
 async function main() {
   console.log("");
