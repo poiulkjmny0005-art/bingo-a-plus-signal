@@ -1408,43 +1408,68 @@ if (edge >= 3) {
 }
 function inspectSuperBallMarkers(html) {
   console.log("");
-  console.log("================================");
-  console.log("🔬 超級獎號 TD 標記分析");
-  console.log("================================");
+  console.log("==============================");
+  console.log("🎯 超級獎號定位分析");
+  console.log("==============================");
 
-  // 抓出所有 TD
-  const tdRegex = /<td\b([^>]*)>([\s\S]*?)<\/td>/gi;
+  // 找出「超級獎號」圖示
+  const markerRegex =
+    /<img\b[^>]*src=["'][^"']*icon_bingo_superball\.gif[^"']*["'][^>]*>/gi;
 
-  let m;
+  let match;
   let count = 0;
 
-  while ((m = tdRegex.exec(html)) !== null) {
-    const attrs = m[1] || "";
-    const inner = m[2] || "";
+  while ((match = markerRegex.exec(html)) !== null) {
+    count++;
 
-    // 只看有 background / superball / consecutive 的 TD
-    if (
-      /background/i.test(attrs) ||
-      /superball/i.test(attrs) ||
-      /consecutive/i.test(attrs) ||
-      /superball/i.test(inner) ||
-      /consecutive/i.test(inner)
-    ) {
-      count++;
+    const markerPos = match.index;
 
-      const text = cleanText(inner);
+    console.log("");
+    console.log("----- 超級獎號標記 #" + count + " -----");
+    console.log("HTML位置：" + markerPos);
+    console.log("標記：" + match[0]);
 
-      console.log("");
-      console.log("----- 標記 #" + count + " -----");
-      console.log("文字：" + (text || "(空白)"));
-      console.log("TD屬性：" + attrs);
-      console.log("完整TD：");
-      console.log(m[0]);
+    // 往前找最近的 Bingo 資料列
+    const before = html.slice(
+      Math.max(0, markerPos - 3000),
+      markerPos
+    );
+
+    const rows =
+      before.match(
+        /<tr\b[^>]*class=["'][^"']*bingo_row[^"']*["'][^>]*>[\s\S]*?<\/tr>/gi
+      ) || [];
+
+    if (rows.length > 0) {
+      const row = rows[rows.length - 1];
+      const cells = getCells(row);
+
+      console.log("前方最近資料列：");
+
+      cells.forEach((cell, i) => {
+        console.log(
+          "[" + i + "] " +
+          (cell.text || "(空白)") +
+          " | class=" +
+          (cell.className || "(無)")
+        );
+      });
+    } else {
+      console.log("⚠️ 前方沒有找到 bingo_row");
     }
+
+    // 同時檢查超級獎號圖示後面的 HTML
+    const after = html.slice(
+      markerPos,
+      Math.min(html.length, markerPos + 1500)
+    );
+
+    console.log("圖示後方 HTML：");
+    console.log(after.slice(0, 800));
   }
 
   console.log("");
-  console.log("🎯 找到特殊 TD 數量：" + count);
+  console.log("🎯 找到超級獎號圖示數量：" + count);
 }
 async function main() {
   console.log("");
