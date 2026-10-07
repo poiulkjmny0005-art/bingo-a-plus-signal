@@ -1446,6 +1446,7 @@ console.log(
   v3Pick.gap
 );
 console.log("============================");
+}
 function inspectSuperBallMarkers(html) {
   console.log("");
   console.log("==============================");
