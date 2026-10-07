@@ -982,10 +982,12 @@ data = Array.from(data);
         item => item.number === n
       );
 
-      stats[n].gap =
-        pos === -1
-          ? data.length
-          : pos;
+      // 遺漏期數
+// past 內完全沒出現過的號碼，不給「最大 GAP」優勢
+stats[n].gap =
+  pos === -1
+    ? 0
+    : pos;
     }
 
     return stats;
