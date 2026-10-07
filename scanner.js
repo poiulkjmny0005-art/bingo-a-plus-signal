@@ -1142,6 +1142,8 @@ stats[n].gap =
   // start以後 = 當時真正能看到的資料
   // ==========================================
 
+  console.log("📊 history總筆數：" + history.length);
+console.log("🧪 可用回測數：" + Math.min(500, history.length - 30 - 12));
   const minimumPast = 30;
 
   const maxTests = Math.min(
