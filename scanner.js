@@ -1446,6 +1446,7 @@ console.log(
 );
 console.log("============================");
 }
+}
 function inspectSuperBallMarkers(html) {
   console.log("");
   console.log("==============================");
