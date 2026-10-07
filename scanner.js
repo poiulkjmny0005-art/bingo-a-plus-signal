@@ -154,10 +154,10 @@ function parseBingoRow(rowHtml) {
     return null;
   }
 
-  const periodCell =
-    cells.find(c =>
-      c.className.includes("BPeriod")
-    );
+  // 取得期號與時間
+  const periodCell = cells.find(c =>
+    c.className.includes("BPeriod")
+  );
 
   if (!periodCell) {
     return null;
@@ -171,6 +171,7 @@ function parseBingoRow(rowHtml) {
     return null;
   }
 
+  // 取得 20 顆開獎號碼
   const numberCell = cells[1];
 
   const numbers =
@@ -179,11 +180,41 @@ function parseBingoRow(rowHtml) {
       .filter(n => n >= 1 && n <= 80)
       .slice(0, 20);
 
+  // 找超級獎號
+  let superBall = null;
+  let superClass = "";
+
+  for (const cell of cells) {
+    const className = String(cell.className || "").trim();
+
+    // 奧索超級獎號 class 會以 s 結尾
+    const isSuperBall = /s$/i.test(className);
+
+    if (!isSuperBall) {
+      continue;
+    }
+
+    const matches =
+      String(cell.text || "").match(/\b\d{1,2}\b/g) || [];
+
+    const candidates = matches
+      .map(Number)
+      .filter(n => n >= 1 && n <= 80);
+
+    if (candidates.length > 0) {
+      superBall = candidates[0];
+      superClass = className;
+      break;
+    }
+  }
+
   return {
     period: pm[1],
     time: pm[2],
     numbers,
-    cells
+    cells,
+    superBall,
+    superClass
   };
 }
 
