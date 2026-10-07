@@ -1173,6 +1173,17 @@ GAP_MOMENTUM: s => {
 
       // 一期只選一顆
       const pick = ranked[0].number;
+      // 🔍 DEBUG：記錄每次回測各模型實際選號
+if (
+  name === "GAP" ||
+  name === "GAP_MID" ||
+  name === "GAP_HOT" ||
+  name === "GAP_MOMENTUM"
+) {
+  console.log(
+    `🔍 回測${start - 11} | ${name} → ${String(pick).padStart(2, "0")}`
+  );
+}
 
       let hitPeriod = 0;
 
