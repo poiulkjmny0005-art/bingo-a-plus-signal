@@ -608,8 +608,8 @@ function buildAPlusSignal(html) {
 
   const history = [];
 
-  // 最多分析最近 100 期
-  const limit = Math.min(rows.length, 100);
+  // 最多分析最近 600 期
+const limit = Math.min(rows.length, 600);
 
   for (let i = 0; i < limit; i++) {
     const rowHtml = rows[i];
