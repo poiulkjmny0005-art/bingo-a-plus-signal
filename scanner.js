@@ -1013,6 +1013,47 @@ data = Array.from(data);
     // 3. 遺漏回補
     GAP: s =>
       Math.min(s.gap, 40),
+    // 3A. GAP 短期回補
+GAP_SHORT: s => {
+  let score = Math.min(s.gap, 12) * 3;
+
+  if (s.gap >= 4 && s.gap <= 10) {
+    score += 8;
+  }
+
+  return score;
+},
+
+// 3B. GAP 中期回補
+GAP_MID: s => {
+  let score = Math.min(s.gap, 25) * 2;
+
+  if (s.gap >= 8 && s.gap <= 18) {
+    score += 10;
+  }
+
+  return score;
+},
+
+// 3C. GAP + 熱度
+GAP_HOT: s => {
+  let score = Math.min(s.gap, 30) * 2;
+
+  score += s.last10 * 3;
+  score += s.last20 * 2;
+
+  return score;
+},
+
+// 3D. GAP + 動能
+GAP_MOMENTUM: s => {
+  let score = Math.min(s.gap, 30) * 2;
+
+  score += s.last5 * 8;
+  score += s.last10 * 4;
+
+  return score;
+},
 
     // 4. 冷轉熱
     TURN: s => {
