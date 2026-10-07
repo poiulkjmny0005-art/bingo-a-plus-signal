@@ -1537,6 +1537,7 @@ function runOutOfSampleTest(history) {
 
   const modelNames = [
     "HOT",
+    "HOT_V2",
     "GAP",
     "MOMENTUM",
     "APLUS",
@@ -1606,6 +1607,28 @@ function runOutOfSampleTest(history) {
 
       return score;
     },
+      HOT_V2: s => {
+    let score = 0;
+
+    score += s.last5 * 8;
+    score += s.last10 * 6;
+    score += s.last20 * 3;
+    score += s.last40 * 0.5;
+
+    if (s.last5 === 1) {
+      score += 4;
+    }
+
+    if (s.last5 >= 2) {
+      score -= 8;
+    }
+
+    if (s.last10 >= 2 && s.last5 <= 1) {
+      score += 5;
+    }
+
+    return score;
+  },
 
     MOMENTUM: s => {
       let score = 0;
