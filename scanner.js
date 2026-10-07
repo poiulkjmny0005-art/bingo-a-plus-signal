@@ -1000,106 +1000,124 @@ stats[n].gap =
 
   const models = {
 
-    // 1. 熱門
-    HOT: s =>
-      s.last20 * 5 +
-      s.last40 * 2 +
-      s.total,
+  // 1. 熱門
+  HOT: s => {
+    let score = 0;
 
-    // 2. 短線動能
-    MOMENTUM: s =>
-      s.last5 * 10 +
-      s.last10 * 5 +
-      s.last20 * 2,
+    score += s.last5 * 10;
+    score += s.last10 * 5;
+    score += s.last20 * 2;
+    score += s.last40;
 
-    // 3. 遺漏回補
-    GAP: s =>
-      Math.min(s.gap, 40),
-    // 3A. GAP 短期回補
-GAP_SHORT: s => {
-  let score = Math.min(s.gap, 12) * 3;
-
-  if (s.gap >= 4 && s.gap <= 10) {
-    score += 8;
-  }
-
-  return score;
-},
-
-// 3B. GAP 中期回補
-GAP_MID: s => {
-  let score = Math.min(s.gap, 25) * 2;
-
-  if (s.gap >= 8 && s.gap <= 18) {
-    score += 10;
-  }
-
-  return score;
-},
-
-// 3C. GAP + 熱度
-GAP_HOT: s => {
-  let score = Math.min(s.gap, 30) * 2;
-
-  score += s.last10 * 3;
-  score += s.last20 * 2;
-
-  return score;
-},
-
-// 3D. GAP + 動能
-GAP_MOMENTUM: s => {
-  let score = Math.min(s.gap, 30) * 2;
-
-  score += s.last5 * 8;
-  score += s.last10 * 4;
-
-  return score;
-},
-
-    // 4. 冷轉熱
-    TURN: s => {
-
-      let score = 0;
-
-      // 最近開始出現
-      score += s.last5 * 10;
-      score += s.last10 * 4;
-
-      // 中期不能太熱
-      score -= s.last40 * 1.5;
-
-      // 有適度遺漏再回來
-      if (s.gap >= 3 && s.gap <= 15) {
-        score += 5;
-      }
-
-      return score;
-    },
-
-    // 5. A+ 多因子
-    APLUS: s => {
-
-      let score = 0;
-
-      score += s.last5 * 8;
-      score += s.last10 * 5;
-      score += s.last20 * 3;
-      score += s.last40;
-
-      // 適度遺漏
-      if (s.gap >= 4 && s.gap <= 12) {
-        score += 6;
-      }
-
-      // 過熱稍微降權
-      if (s.last5 >= 2) {
-        score -= 3;
-      }
-
-      return score;
+    // 避免過熱
+    if (s.last5 >= 2) {
+      score -= 4;
     }
-  };
+
+    return score;
+  },
+
+
+  // 2. 短線動能
+  MOMENTUM: s => {
+    let score = 0;
+
+    score += s.last5 * 12;
+    score += s.last10 * 6;
+    score += s.last20 * 2;
+
+    // 最近有出現，但不是連續過熱
+    if (s.last5 === 1) {
+      score += 5;
+    }
+
+    if (s.last5 >= 2) {
+      score -= 5;
+    }
+
+    return score;
+  },
+
+
+  // 3. 遺漏回補
+  GAP: s => {
+    let score = Math.min(s.gap, 40);
+
+    // 主要觀察區
+    if (s.gap >= 6 && s.gap <= 20) {
+      score += 8;
+    }
+
+    // 遺漏太久稍微降權
+    if (s.gap > 30) {
+      score -= 5;
+    }
+
+    return score;
+  },
+
+
+  // 4. 短期 GAP
+  GAP_SHORT: s => {
+    let score = Math.min(s.gap, 15) * 2;
+
+    if (s.gap >= 4 && s.gap <= 10) {
+      score += 10;
+    }
+
+    score += s.last10 * 2;
+
+    return score;
+  },
+
+
+  // 5. 冷轉熱
+  TURN: s => {
+    let score = 0;
+
+    score += s.last5 * 10;
+    score += s.last10 * 4;
+
+    // 中期太熱扣分
+    score -= s.last40 * 1.5;
+
+    // 適度遺漏後重新出現
+    if (s.gap >= 3 && s.gap <= 15) {
+      score += 6;
+    }
+
+    return score;
+  },
+
+
+  // 6. A+ 多因子
+  APLUS: s => {
+    let score = 0;
+
+    score += s.last5 * 8;
+    score += s.last10 * 5;
+    score += s.last20 * 3;
+    score += s.last40;
+
+    // 適度遺漏
+    if (s.gap >= 4 && s.gap <= 12) {
+      score += 8;
+    }
+
+    // 最近剛好出現一次
+    if (s.last5 === 1) {
+      score += 5;
+    }
+
+    // 過熱降權
+    if (s.last5 >= 2) {
+      score -= 5;
+    }
+
+    return score;
+  }
+
+};
 
 
   const results = {};
