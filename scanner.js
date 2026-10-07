@@ -82,6 +82,43 @@ async function fetchPage(date) {
     html
   };
 }
+async function fetchRecentDays(days = 3) {
+  console.log("");
+  console.log("==============================");
+  console.log("📚 開始抓最近 " + days + " 天資料");
+  console.log("==============================");
+
+  const pages = [];
+
+  for (let i = 1; i <= days; i++) {
+    const date = taiwanDate(-i);
+
+    const result = await fetchPage(date);
+
+    if (result && result.html) {
+      pages.push(result);
+
+      console.log(
+        "✅ " + date +
+        " 抓取成功"
+      );
+    } else {
+      console.log(
+        "⚠️ " + date +
+        " 抓取失敗"
+      );
+    }
+  }
+
+  console.log("");
+  console.log(
+    "📊 成功取得 " +
+    pages.length +
+    " 天網頁"
+  );
+
+  return pages;
+}
   async function fetchRKPage() {
   const url = "https://lotto.auzo.tw/RK.php";
 
@@ -1523,21 +1560,61 @@ async function main() {
   console.log("");
   console.log("📅 台灣日期：" + date);
 
-  const rkResult = await fetchRKPage();
-const result = rkResult && rkResult.html ? rkResult : await fetchPage(date);
+  // ========================================
+// 抓最近 3 天資料
+// 合併 Bingo 資料列
+// 去除重複期號
+// 最多保留 600 期
+// ========================================
 
-  if (!result || !result.html) {
-    console.log("❌ 抓不到網頁資料");
-    return;
+const pages = await fetchRecentDays(3);
+
+if (!pages || pages.length === 0) {
+  console.log("❌ 抓不到最近 3 天資料");
+  return;
+}
+
+const rowMap = new Map();
+
+for (const page of pages) {
+  const pageRows = getBingoRows(page.html);
+
+  console.log(
+    "📅 " +
+    page.date +
+    " → " +
+    pageRows.length +
+    " 期"
+  );
+
+  for (const rowHtml of pageRows) {
+    const parsed = parseBingoRow(rowHtml);
+
+    if (!parsed || !parsed.period) {
+      continue;
+    }
+
+    if (!rowMap.has(parsed.period)) {
+      rowMap.set(parsed.period, rowHtml);
+    }
   }
+}
 
-  const html = result.html;
+const rows = Array.from(rowMap.values())
+  .sort((a, b) => {
+    const pa = parseBingoRow(a);
+    const pb = parseBingoRow(b);
 
-  console.log("");
-  console.log("✅ 網頁取得成功");
-  console.log("HTML 長度：" + html.length);
+    return Number(pb.period) - Number(pa.period);
+  })
+  .slice(0, 600);
 
-  const rows = getBingoRows(html);
+// 重新組成 HTML，讓後面的舊程式可以繼續使用
+const html = rows.join("\n");
+
+console.log("");
+console.log("✅ 最近 3 天資料合併成功");
+console.log("🎯 去重後 Bingo 資料列：" + rows.length);
 
   console.log("");
   console.log("🎯 找到 Bingo 資料列：" + rows.length);
