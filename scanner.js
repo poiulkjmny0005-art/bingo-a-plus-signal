@@ -951,6 +951,7 @@ if (hitCount > 0) {
 
 console.log("==============================");
   runModelCompetition(history);
+  runOutOfSampleTest(history);
 }
 // ==================================================
 // A+ v2 模型競賽
