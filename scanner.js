@@ -1337,6 +1337,24 @@ if (
       winner.rate.toFixed(2) +
       "%"
     );
+    const edge = winner.rate - randomRate;
+
+console.log(
+    "📈 超越隨機基準：" +
+    (edge >= 0 ? "+" : "") +
+    edge.toFixed(2) +
+    "%"
+);
+
+if (edge >= 3) {
+    console.log("🟢 優勢：強");
+} else if (edge >= 1.5) {
+    console.log("🟡 優勢：普通");
+} else if (edge > 0) {
+    console.log("🟠 優勢：微弱");
+} else {
+    console.log("🔴 無統計優勢");
+}
 
 
     // ========================================
