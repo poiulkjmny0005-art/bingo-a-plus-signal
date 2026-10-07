@@ -934,7 +934,7 @@ function runModelCompetition(history) {
   // ------------------------------------------
 
   function buildStats(data) {
-
+data = Array.from(data);
     const stats = {};
 
     for (let n = 1; n <= 80; n++) {
