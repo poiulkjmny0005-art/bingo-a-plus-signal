@@ -83,20 +83,18 @@ async function fetchPage(date) {
   };
 }
 async function fetchRKPage() {
-  const targetUrl = "https://lotto.auzo.tw/RK.php";
-  const url =
-    "https://getip.auzo.tw/get_real_ip.php?url=" +
-    encodeURIComponent(targetUrl);
+  async function fetchRKPage() {
+  const url = "https://lotto.auzo.tw/RK.php";
 
   console.log("");
-  console.log("🔴 開始抓 RK.php");
-  console.log("轉接網址：" + url);
+  console.log("🔴 直接測試 RK.php");
+  console.log("網址：" + url);
 
   const response = await fetch(url, {
     redirect: "manual",
     headers: {
       "User-Agent":
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1",
       "Accept":
         "text/html,application/xhtml+xml"
     }
@@ -104,7 +102,8 @@ async function fetchRKPage() {
 
   console.log("RK HTTP：" + response.status);
   console.log(
-    "RK Location：" + (response.headers.get("location") || "(沒有)")
+    "RK Location：" +
+    (response.headers.get("location") || "(沒有)")
   );
 
   const html = await response.text();
