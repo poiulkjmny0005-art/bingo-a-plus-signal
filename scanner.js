@@ -1367,45 +1367,85 @@ if (edge >= 3) {
     // 用全部目前歷史資料產生現在的一顆
     // ========================================
 
-    const currentStats =
-      buildStats(
-        history.slice(0, 50)
-      );
+    // ==========================================
+// 🔥 A+ v3 一期一顆
+// 近期 + GAP + 熱度 + 回測最佳模型
+// ==========================================
 
-    const currentRanking =
-      Object.values(currentStats)
-        .map(s => ({
-          number: s.number,
-          score:
-            models[winner.name](s)
-        }))
-        .sort((a, b) => {
+const v3Stats = buildStats(
+  history.slice(0, 50)
+);
 
-          if (b.score !== a.score) {
-            return b.score - a.score;
-          }
+const v3Ranking = Object.values(v3Stats)
+  .map(s => {
 
-          return a.number - b.number;
-        });
+    // 回測最佳模型分數
+    const modelScore =
+      models[winner.name](s);
 
+    // 近期出現次數
+    const recent20 = history
+      .slice(0, 20)
+      .filter(x => Number(x) === Number(s.number))
+      .length;
 
-    const currentPick =
-      currentRanking[0];
+    const recent50 = history
+      .slice(0, 50)
+      .filter(x => Number(x) === Number(s.number))
+      .length;
 
-    console.log("");
-    console.log("==============================");
-    console.log("🔥 A+ v2 一期一顆");
-    console.log(
-      "👉 " +
-      String(currentPick.number)
-        .padStart(2, "0")
-    );
-    console.log(
-      "模型：" + winner.name
-    );
-    console.log("==============================");
-  }
-}
+    // GAP
+    const gap =
+      Number(s.gap ?? 0);
+
+    // A+ v3 綜合分數
+    const v3Score =
+      modelScore +
+      recent20 * 2 +
+      recent50 * 0.5 +
+      Math.min(gap, 12) * 0.25;
+
+    return {
+      number: s.number,
+      modelScore,
+      recent20,
+      recent50,
+      gap,
+      v3Score
+    };
+  })
+  .sort((a, b) => {
+
+    if (b.v3Score !== a.v3Score) {
+      return b.v3Score - a.v3Score;
+    }
+
+    return a.number - b.number;
+  });
+
+const v3Pick = v3Ranking[0];
+
+console.log("");
+console.log("============================");
+console.log("🔥 A+ v3 一期一顆");
+console.log(
+  "👉 " +
+  String(v3Pick.number).padStart(2, "0")
+);
+console.log("模型：" + winner.name);
+console.log(
+  "V3分數：" +
+  v3Pick.v3Score.toFixed(2)
+);
+console.log(
+  "近期20期出現：" +
+  v3Pick.recent20
+);
+console.log(
+  "GAP：" +
+  v3Pick.gap
+);
+console.log("============================");
 function inspectSuperBallMarkers(html) {
   console.log("");
   console.log("==============================");
