@@ -1413,7 +1413,8 @@ async function main() {
   console.log("");
   console.log("📅 台灣日期：" + date);
 
-  const result = await fetchPage(date);
+  const rkResult = await fetchRKPage();
+const result = rkResult && rkResult.html ? rkResult : await fetchPage(date);
 
   if (!result || !result.html) {
     console.log("❌ 抓不到網頁資料");
