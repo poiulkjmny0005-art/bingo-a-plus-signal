@@ -1580,3 +1580,4 @@ main().catch(err => {
   console.error("❌ 執行錯誤：", err);
   process.exit(1);
 });
+{
