@@ -1103,9 +1103,9 @@ function runModelCompetition(history) {
       continue;
     }
 
-    const future12 = history
-      .slice(start - 12, start)
-      .reverse();
+    const future12 = Array.from(
+  history.slice(start - 12, start)
+).reverse();
 
     const stats = buildStats(past);
 
