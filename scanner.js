@@ -1358,7 +1358,6 @@ async function main() {
   deepSearchSuperBall(html);
   inspectLatestBallHtml(html);
   buildAPlusSignal(html);
-  runModelCompetition(html);
 }
 
 main().catch(err => {
