@@ -1406,6 +1406,46 @@ if (edge >= 3) {
     console.log("==============================");
   }
 }
+function inspectSuperBallMarkers(html) {
+  console.log("");
+  console.log("================================");
+  console.log("🔬 超級獎號 TD 標記分析");
+  console.log("================================");
+
+  // 抓出所有 TD
+  const tdRegex = /<td\b([^>]*)>([\s\S]*?)<\/td>/gi;
+
+  let m;
+  let count = 0;
+
+  while ((m = tdRegex.exec(html)) !== null) {
+    const attrs = m[1] || "";
+    const inner = m[2] || "";
+
+    // 只看有 background / superball / consecutive 的 TD
+    if (
+      /background/i.test(attrs) ||
+      /superball/i.test(attrs) ||
+      /consecutive/i.test(attrs) ||
+      /superball/i.test(inner) ||
+      /consecutive/i.test(inner)
+    ) {
+      count++;
+
+      const text = cleanText(inner);
+
+      console.log("");
+      console.log("----- 標記 #" + count + " -----");
+      console.log("文字：" + (text || "(空白)"));
+      console.log("TD屬性：" + attrs);
+      console.log("完整TD：");
+      console.log(m[0]);
+    }
+  }
+
+  console.log("");
+  console.log("🎯 找到特殊 TD 數量：" + count);
+}
 async function main() {
   console.log("");
   console.log("==============================");
@@ -1465,6 +1505,7 @@ const result = rkResult && rkResult.html ? rkResult : await fetchPage(date);
   inspectSuperBall(html);
   deepSearchSuperBall(html);
   inspectLatestBallHtml(html);
+  inspectSuperBallMarkers(html);
   buildAPlusSignal(html);
 }
 
