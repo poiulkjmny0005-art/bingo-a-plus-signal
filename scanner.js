@@ -1084,7 +1084,7 @@ data = Array.from(data);
   const minimumPast = 30;
 
   const maxTests = Math.min(
-    50,
+    200,
     history.length - minimumPast - 12
   );
 
