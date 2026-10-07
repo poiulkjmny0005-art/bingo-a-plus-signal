@@ -82,7 +82,6 @@ async function fetchPage(date) {
     html
   };
 }
-async function fetchRKPage() {
   async function fetchRKPage() {
   const url = "https://lotto.auzo.tw/RK.php";
 
