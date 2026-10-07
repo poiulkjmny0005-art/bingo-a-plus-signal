@@ -1484,6 +1484,304 @@ console.log(
 console.log("============================");
 }
 }
+// ==================================================
+// A+ v4 樣本外驗證
+// 舊資料選模型 → 新資料只負責驗證
+// ==================================================
+
+function runOutOfSampleTest(history) {
+  console.log("");
+  console.log("================================");
+  console.log("🧪 A+ v4 樣本外驗證");
+  console.log("================================");
+
+  if (!history || history.length < 300) {
+    console.log("❌ 歷史資料不足 300 期");
+    return;
+  }
+
+  // history[0] = 最新
+  // 前 200 期作為完全獨立的驗證區
+  // 更舊的資料作為模型運作所需的歷史資料
+  const validationSize = Math.min(
+    200,
+    history.length - 60
+  );
+
+  const modelNames = [
+    "HOT",
+    "GAP",
+    "MOMENTUM",
+    "APLUS",
+    "TURN",
+    "GAP_SHORT"
+  ];
+
+  const results = {};
+
+  modelNames.forEach(name => {
+    results[name] = {
+      tests: 0,
+      hits: 0,
+      totalHitPeriod: 0
+    };
+  });
+
+  function buildStats(data) {
+    const stats = {};
+
+    for (let n = 1; n <= 80; n++) {
+      stats[n] = {
+        number: n,
+        last5: 0,
+        last10: 0,
+        last20: 0,
+        last40: 0,
+        total: 0,
+        gap: 0
+      };
+    }
+
+    data.forEach((item, index) => {
+      const n = item.number;
+
+      if (!stats[n]) return;
+
+      stats[n].total++;
+
+      if (index < 5) stats[n].last5++;
+      if (index < 10) stats[n].last10++;
+      if (index < 20) stats[n].last20++;
+      if (index < 40) stats[n].last40++;
+    });
+
+    for (let n = 1; n <= 80; n++) {
+      const pos = data.findIndex(
+        item => item.number === n
+      );
+
+      stats[n].gap =
+        pos === -1 ? 0 : pos;
+    }
+
+    return stats;
+  }
+
+  const models = {
+    HOT: s => {
+      let score = 0;
+      score += s.last5 * 10;
+      score += s.last10 * 5;
+      score += s.last20 * 2;
+      score += s.last40;
+
+      if (s.last5 >= 2) score -= 4;
+
+      return score;
+    },
+
+    MOMENTUM: s => {
+      let score = 0;
+      score += s.last5 * 12;
+      score += s.last10 * 6;
+      score += s.last20 * 2;
+
+      if (s.last5 === 1) score += 5;
+      if (s.last5 >= 2) score -= 5;
+
+      return score;
+    },
+
+    GAP: s => {
+      let score = Math.min(s.gap, 40);
+
+      if (s.gap >= 6 && s.gap <= 20) {
+        score += 8;
+      }
+
+      if (s.gap > 30) {
+        score -= 5;
+      }
+
+      return score;
+    },
+
+    GAP_SHORT: s => {
+      let score = Math.min(s.gap, 15) * 2;
+
+      if (s.gap >= 4 && s.gap <= 10) {
+        score += 10;
+      }
+
+      score += s.last10 * 2;
+
+      return score;
+    },
+
+    TURN: s => {
+      let score = 0;
+
+      score += s.last5 * 10;
+      score += s.last10 * 4;
+      score -= s.last40 * 1.5;
+
+      if (s.gap >= 3 && s.gap <= 15) {
+        score += 6;
+      }
+
+      return score;
+    },
+
+    APLUS: s => {
+      let score = 0;
+
+      score += s.last5 * 8;
+      score += s.last10 * 5;
+      score += s.last20 * 3;
+      score += s.last40;
+
+      if (s.gap >= 4 && s.gap <= 12) {
+        score += 8;
+      }
+
+      if (s.last5 === 1) {
+        score += 5;
+      }
+
+      if (s.last5 >= 2) {
+        score -= 5;
+      }
+
+      return score;
+    }
+  };
+
+  for (
+    let start = validationSize;
+    start >= 12;
+    start--
+  ) {
+    const past = history.slice(
+      start,
+      Math.min(history.length, start + 50)
+    );
+
+    if (past.length < 30) {
+      continue;
+    }
+
+    const future12 = Array.from(
+      history.slice(start - 12, start)
+    ).reverse();
+
+    const stats = buildStats(past);
+
+    modelNames.forEach(name => {
+      const ranked = Object.values(stats)
+        .map(s => ({
+          number: s.number,
+          score: models[name](s)
+        }))
+        .sort((a, b) => {
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+
+          return a.number - b.number;
+        });
+
+      const pick = ranked[0].number;
+
+      let hitPeriod = 0;
+
+      for (let i = 0; i < future12.length; i++) {
+        if (future12[i].number === pick) {
+          hitPeriod = i + 1;
+          break;
+        }
+      }
+
+      results[name].tests++;
+
+      if (hitPeriod > 0) {
+        results[name].hits++;
+        results[name].totalHitPeriod += hitPeriod;
+      }
+    });
+  }
+
+  const randomRate =
+    (1 - Math.pow(79 / 80, 12)) * 100;
+
+  console.log("");
+  console.log("📊 獨立驗證結果");
+  console.log("--------------------------------");
+
+  const summary = Object.entries(results)
+    .map(([name, r]) => {
+      const rate =
+        r.tests > 0
+          ? r.hits / r.tests * 100
+          : 0;
+
+      const avg =
+        r.hits > 0
+          ? r.totalHitPeriod / r.hits
+          : 0;
+
+      return {
+        name,
+        ...r,
+        rate,
+        avg
+      };
+    })
+    .sort((a, b) => b.rate - a.rate);
+
+  summary.forEach((r, index) => {
+    console.log(
+      String(index + 1).padStart(2, "0") +
+      ". " +
+      r.name +
+      " | 命中=" +
+      r.hits +
+      "/" +
+      r.tests +
+      " | 命中率=" +
+      r.rate.toFixed(2) +
+      "%" +
+      " | 平均第" +
+      r.avg.toFixed(2) +
+      "期"
+    );
+  });
+
+  console.log("");
+  console.log(
+    "🎲 隨機理論基準：約 " +
+    randomRate.toFixed(2) +
+    "%"
+  );
+
+  if (summary.length > 0) {
+    const winner = summary[0];
+    const edge = winner.rate - randomRate;
+
+    console.log(
+      "🥇 樣本外最佳：" +
+      winner.name
+    );
+
+    console.log(
+      "📈 相對隨機：" +
+      (edge >= 0 ? "+" : "") +
+      edge.toFixed(2) +
+      "%"
+    );
+  }
+
+  console.log("================================");
+}
 function inspectSuperBallMarkers(html) {
   console.log("");
   console.log("==============================");
