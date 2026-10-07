@@ -909,6 +909,395 @@ if (hitCount > 0) {
 }
 
 console.log("==============================");
+  runModelCompetition(history);
+}
+// ==================================================
+// A+ v2 模型競賽
+// 一期一顆 → 往後驗證 12 期
+// ==================================================
+
+function runModelCompetition(history) {
+
+  console.log("");
+  console.log("================================");
+  console.log("🧠 A+ v2 模型競賽");
+  console.log("================================");
+
+  if (!history || history.length < 50) {
+    console.log("❌ 歷史資料不足");
+    return;
+  }
+
+  // ------------------------------------------
+  // 建立某個時間點以前的統計資料
+  // data[0] = 當時最近一期
+  // ------------------------------------------
+
+  function buildStats(data) {
+
+    const stats = {};
+
+    for (let n = 1; n <= 80; n++) {
+      stats[n] = {
+        number: n,
+        last5: 0,
+        last10: 0,
+        last20: 0,
+        last40: 0,
+        total: 0,
+        gap: data.length
+      };
+    }
+
+    data.forEach((item, index) => {
+
+      const n = item.number;
+
+      if (!stats[n]) return;
+
+      stats[n].total++;
+
+      if (index < 5) {
+        stats[n].last5++;
+      }
+
+      if (index < 10) {
+        stats[n].last10++;
+      }
+
+      if (index < 20) {
+        stats[n].last20++;
+      }
+
+      if (index < 40) {
+        stats[n].last40++;
+      }
+
+    });
+
+    // 遺漏期數
+    for (let n = 1; n <= 80; n++) {
+
+      const pos = data.findIndex(
+        item => item.number === n
+      );
+
+      stats[n].gap =
+        pos === -1
+          ? data.length
+          : pos;
+    }
+
+    return stats;
+  }
+
+
+  // ==========================================
+  // 五種模型
+  // ==========================================
+
+  const models = {
+
+    // 1. 熱門
+    HOT: s =>
+      s.last20 * 5 +
+      s.last40 * 2 +
+      s.total,
+
+    // 2. 短線動能
+    MOMENTUM: s =>
+      s.last5 * 10 +
+      s.last10 * 5 +
+      s.last20 * 2,
+
+    // 3. 遺漏回補
+    GAP: s =>
+      Math.min(s.gap, 40),
+
+    // 4. 冷轉熱
+    TURN: s => {
+
+      let score = 0;
+
+      // 最近開始出現
+      score += s.last5 * 10;
+      score += s.last10 * 4;
+
+      // 中期不能太熱
+      score -= s.last40 * 1.5;
+
+      // 有適度遺漏再回來
+      if (s.gap >= 3 && s.gap <= 15) {
+        score += 5;
+      }
+
+      return score;
+    },
+
+    // 5. A+ 多因子
+    APLUS: s => {
+
+      let score = 0;
+
+      score += s.last5 * 8;
+      score += s.last10 * 5;
+      score += s.last20 * 3;
+      score += s.last40;
+
+      // 適度遺漏
+      if (s.gap >= 4 && s.gap <= 12) {
+        score += 6;
+      }
+
+      // 過熱稍微降權
+      if (s.last5 >= 2) {
+        score -= 3;
+      }
+
+      return score;
+    }
+  };
+
+
+  const results = {};
+
+  Object.keys(models).forEach(name => {
+
+    results[name] = {
+      tests: 0,
+      hits: 0,
+      misses: 0,
+      totalHitPeriod: 0
+    };
+
+  });
+
+
+  // ==========================================
+  // Walk-forward 回測
+  //
+  // history[0] = 最新
+  // start以前的12期 = 未來驗證區
+  // start以後 = 當時真正能看到的資料
+  // ==========================================
+
+  const minimumPast = 30;
+
+  const maxTests = Math.min(
+    50,
+    history.length - minimumPast - 12
+  );
+
+  for (
+    let start = 12;
+    start < 12 + maxTests;
+    start++
+  ) {
+
+    const past = history.slice(
+      start,
+      Math.min(history.length, start + 50)
+    );
+
+    if (past.length < minimumPast) {
+      continue;
+    }
+
+    const future12 = history
+      .slice(start - 12, start)
+      .reverse();
+
+    const stats = buildStats(past);
+
+
+    Object.keys(models).forEach(name => {
+
+      const model = models[name];
+
+      const ranked =
+        Object.values(stats)
+          .map(s => ({
+            number: s.number,
+            score: model(s)
+          }))
+          .sort((a, b) => {
+
+            if (b.score !== a.score) {
+              return b.score - a.score;
+            }
+
+            return a.number - b.number;
+          });
+
+
+      // 一期只選一顆
+      const pick = ranked[0].number;
+
+      let hitPeriod = 0;
+
+      for (
+        let i = 0;
+        i < future12.length;
+        i++
+      ) {
+
+        if (
+          future12[i].number === pick
+        ) {
+
+          hitPeriod = i + 1;
+          break;
+        }
+      }
+
+
+      results[name].tests++;
+
+      if (hitPeriod > 0) {
+
+        results[name].hits++;
+        results[name].totalHitPeriod +=
+          hitPeriod;
+
+      } else {
+
+        results[name].misses++;
+
+      }
+
+    });
+  }
+
+
+  // ==========================================
+  // 顯示結果
+  // ==========================================
+
+  console.log("");
+  console.log("🏆 模型比較");
+  console.log("--------------------------------");
+
+
+  const summary =
+    Object.entries(results)
+      .map(([name, r]) => {
+
+        const rate =
+          r.tests > 0
+            ? r.hits / r.tests * 100
+            : 0;
+
+        const avg =
+          r.hits > 0
+            ? r.totalHitPeriod / r.hits
+            : 0;
+
+        return {
+          name,
+          ...r,
+          rate,
+          avg
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.rate - a.rate
+      );
+
+
+  summary.forEach((r, index) => {
+
+    console.log(
+      String(index + 1).padStart(2, "0") +
+      ". " +
+      r.name +
+      " | 命中=" +
+      r.hits +
+      "/" +
+      r.tests +
+      " | 命中率=" +
+      r.rate.toFixed(2) +
+      "%" +
+      " | 平均第" +
+      r.avg.toFixed(2) +
+      "期"
+    );
+
+  });
+
+
+  console.log("");
+  console.log("--------------------------------");
+
+  // 80號選1顆，12期至少出現一次的理論基準
+  const randomRate =
+    (
+      1 -
+      Math.pow(79 / 80, 12)
+    ) * 100;
+
+  console.log(
+    "🎲 隨機理論基準：約 " +
+    randomRate.toFixed(2) +
+    "%"
+  );
+
+
+  if (summary.length > 0) {
+
+    const winner = summary[0];
+
+    console.log("");
+    console.log("🥇目前回測最佳：" + winner.name);
+    console.log(
+      "🎯 12期命中率：" +
+      winner.rate.toFixed(2) +
+      "%"
+    );
+
+
+    // ========================================
+    // 用全部目前歷史資料產生現在的一顆
+    // ========================================
+
+    const currentStats =
+      buildStats(
+        history.slice(0, 50)
+      );
+
+    const currentRanking =
+      Object.values(currentStats)
+        .map(s => ({
+          number: s.number,
+          score:
+            models[winner.name](s)
+        }))
+        .sort((a, b) => {
+
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+
+          return a.number - b.number;
+        });
+
+
+    const currentPick =
+      currentRanking[0];
+
+    console.log("");
+    console.log("==============================");
+    console.log("🔥 A+ v2 一期一顆");
+    console.log(
+      "👉 " +
+      String(currentPick.number)
+        .padStart(2, "0")
+    );
+    console.log(
+      "模型：" + winner.name
+    );
+    console.log("==============================");
+  }
 }
 async function main() {
   console.log("");
@@ -969,6 +1358,7 @@ async function main() {
   deepSearchSuperBall(html);
   inspectLatestBallHtml(html);
   buildAPlusSignal(html);
+  runModelCompetition(html);
 }
 
 main().catch(err => {
