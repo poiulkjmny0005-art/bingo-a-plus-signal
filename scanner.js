@@ -86,35 +86,41 @@ async function fetchPage(date) {
   const url = "https://lotto.auzo.tw/RK.php";
 
   console.log("");
-  console.log("🔴 直接測試 RK.php");
+  console.log("🔴 測試 RK.php 自動轉址");
   console.log("網址：" + url);
 
-  const response = await fetch(url, {
-    redirect: "manual",
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1",
-      "Accept":
-        "text/html,application/xhtml+xml"
-    }
-  });
+  try {
+    const response = await fetch(url, {
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
+        "Accept":
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      }
+    });
 
-  console.log("RK HTTP：" + response.status);
-  console.log(
-    "RK Location：" +
-    (response.headers.get("location") || "(沒有)")
-  );
+    console.log("RK 最終 HTTP：" + response.status);
+    console.log("RK 最終網址：" + response.url);
 
-  const html = await response.text();
+    const html = await response.text();
 
-  console.log("RK 回傳長度：" + html.length);
-  console.log("RK 前300字：");
-  console.log(html.slice(0, 300));
+    console.log("RK 回傳長度：" + html.length);
+    console.log("RK 前300字：");
+    console.log(html.slice(0, 300));
 
-  return {
-    url,
-    html
-  };
+    return {
+      url: response.url,
+      html
+    };
+  } catch (err) {
+    console.log("⚠️ RK 抓取失敗：" + err.message);
+
+    return {
+      url,
+      html: ""
+    };
+  }
 }
 
 function getBingoRows(html) {
