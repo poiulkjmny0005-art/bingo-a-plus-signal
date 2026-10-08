@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
-// 3/4/5-star historical repeat analysis. Historical analysis, not a guarantee of returns.
+// 3/4/5-star analysis selecting freely from 01..80, not limited to the prior draw.
+// Historical analysis, not a guarantee of returns.
 // node star345_backtest.js history.csv --warmup=200 --validation=500 --holdout=500
 const fs = require('node:fs');
 const args = process.argv.slice(2);
@@ -24,17 +25,57 @@ function parseCsv(txt){
   return rows;
 }
 const draws=parseCsv(fs.readFileSync(filename,'utf8'));
+// All strategies score each of the 80 numbers using ONLY the past at each prediction time.
+// A 25% per-number draw probability is the theoretical baseline for an independent fair draw.
+// 50-period visual chart features, computed from past 20-number draws (NOT Super Number).
+// Every scoring function receives only the draws available BEFORE the evaluated draw.
+const frequency=(n,h,count)=>h.slice(-count).filter(d=>d.numbers.includes(n)).length;
+const last50=h=>h.slice(-50);
+const has=(d,n)=>n>=1&&n<=80&&d.numbers.includes(n);
+const recentConsecutive=(n,h)=>{
+  const w=last50(h);let v=0;
+  for(let i=1;i<w.length;i++)if(has(w[i-1],n)&&has(w[i],n))v++;
+  return v;
+};
+const diagonal=(n,h)=>{
+  const w=last50(h);let v=0;
+  for(let i=1;i<w.length;i++){
+    if(has(w[i-1],n-1)&&has(w[i],n))v++;
+    if(has(w[i-1],n+1)&&has(w[i],n))v++;
+  }
+  return v;
+};
+const neighborhood=(n,h)=>{
+  const w=last50(h);let v=0;
+  for(const d of w)for(let m=Math.max(1,n-2);m<=Math.min(80,n+2);m++)if(has(d,m))v++;
+  return v;
+};
+const gapPattern=(n,h)=>{
+  const w=last50(h);let gap=0,score=0;
+  for(const d of w){
+    if(has(d,n)){if(gap>=2&&gap<=5)score++;gap=0;}
+    else gap++;
+  }
+  return score;
+};
 const models={
-  '近10期熱度':(n,h)=>h.slice(-10).filter(d=>d.numbers.includes(n)).length,
-  '近30期熱度':(n,h)=>h.slice(-30).filter(d=>d.numbers.includes(n)).length,
-  '近期加權熱度':(n,h)=>h.slice(-40).reduce((s,d,i,a)=>s+(d.numbers.includes(n)?(i+1)/a.length:0),0),
-  '近期冷號':(n,h)=>-h.slice(-30).filter(d=>d.numbers.includes(n)).length,
-  '歷史連莊率(平滑)':(n,h)=>{let exposure=0,repeats=0;for(let i=1;i<h.length;i++)if(h[i-1].numbers.includes(n)){exposure++;if(h[i].numbers.includes(n))repeats++;}return(repeats+5)/(exposure+20);},
+  '近10期熱度':(n,h)=>frequency(n,h,10),
+  '近30期熱度':(n,h)=>frequency(n,h,30),
+  '近50期熱度':(n,h)=>frequency(n,h,50),
+  '近100期熱度':(n,h)=>frequency(n,h,100),
+  '近期加權熱度':(n,h)=>h.slice(-40).reduce((sum,d,i,a)=>sum+(has(d,n)?(i+1)/a.length:0),0),
+  '近期冷號':(n,h)=>-frequency(n,h,30),
+  '歷史總熱度(平滑)':(n,h)=>(frequency(n,h,h.length)+5)/(h.length+20),
+  '50期直線連莊':(n,h)=>recentConsecutive(n,h),
+  '50期斜線相鄰':(n,h)=>diagonal(n,h),
+  '50期密集區域':(n,h)=>neighborhood(n,h),
+  '50期間隔2至5期':(n,h)=>gapPattern(n,h),
+  '50期熱度加速':(n,h)=>frequency(n,h,10)*4-frequency(n,h.slice(0,-10),40),
   '固定號碼排序(對照)':n=>-n
 };
 const names=Object.keys(models),stars=[3,4,5];
 const firstValidation=draws.length-holdout-validation, firstHoldout=draws.length-holdout;
-function rank(name,h){const last=h[h.length-1].numbers;return last.map(n=>({n,s:models[name](n,h)})).sort((a,b)=>b.s-a.s||a.n-b.n).map(x=>x.n);}
+function rank(name,h){return Array.from({length:80},(_,i)=>i+1).map(n=>({n,s:models[name](n,h)})).sort((a,b)=>b.s-a.s||a.n-b.n).map(x=>x.n);}
 function calcRange(start,end){
  const out=Object.fromEntries(names.map(name=>[name,Object.fromEntries(stars.map(k=>[k,{counts:Array(k+1).fill(0),total:0}]))]));
  for(let i=start;i<end;i++){
@@ -52,10 +93,10 @@ const validationResults=calcRange(firstValidation,firstHoldout);
 const winners=Object.fromEntries(stars.map(k=>[k,selected(validationResults,k)]));
 const holdoutResults=calcRange(firstHoldout,draws.length);
 const records=[['star','model_selected_on_validation','validation_periods','validation_avg_hits','holdout_periods','holdout_avg_hits','holdout_any_pct','theoretical_any_pct',...Array.from({length:6},(_,i)=>`hits_${i}`)]];
-console.log('=== 賓果連莊 A+：3星／4星／5星（20顆中挑號，下期驗證）===');
+console.log('=== 賓果 A+：50期圖形走勢／3星／4星／5星（01～80全號碼）===');
 console.log(`完整歷史 ${draws.length} 期；最早 ${draws[0].period}；最新 ${draws.at(-1).period}`);
 console.log(`暖身至少 ${warmup} 期；策略挑選區 ${validation} 期（${draws[firstValidation].period}～${draws[firstHoldout-1].period}）；獨立保留測試 ${holdout} 期（${draws[firstHoldout].period}～${draws.at(-1).period}）`);
-console.log('每次預測只使用該期以前的資料；策略依驗證區選出後才在保留區評估。');
+console.log('選號範圍：01～80，不限上一期開出號碼；新增50期直線、斜線、密集、間隔、熱度加速等策略。每次預測只使用該期以前的資料；策略依驗證區選出後才在保留區評估。');
 for(const k of stars){
  const name=winners[k],v=validationResults[name][k],r=holdoutResults[name][k];
  const any=r.counts.slice(1).reduce((a,b)=>a+b,0),baseline=1-theoretical(k,0);
@@ -71,4 +112,4 @@ for(const k of stars){
 }
 fs.writeFileSync('star345_summary.csv',records.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')+'\n');
 console.log('\n已輸出 star345_summary.csv。此版未計算獎金/報酬率，須先核對官方星數賠付表與投注金額。');
-console.log('提醒：公平獨立開獎下，歷史連莊、熱門或冷號不會改變每顆號碼下一期25%的機率。');
+console.log('提醒：公平獨立開獎下，歷史熱門或冷號不會改變每顆號碼下一期25%的機率。');
