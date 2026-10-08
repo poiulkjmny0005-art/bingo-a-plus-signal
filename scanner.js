@@ -1538,6 +1538,7 @@ function runOutOfSampleTest(history) {
   const modelNames = [
     "HOT",
     "HOT_V2",
+    "HYBRID",
     "GAP",
     "MOMENTUM",
     "APLUS",
@@ -1681,7 +1682,12 @@ function runOutOfSampleTest(history) {
 
       return score;
     },
+  HYBRID: s => {
+    const hotScore = models.HOT(s);
+    const turnScore = models.TURN(s);
 
+    return hotScore * 0.5 + turnScore * 0.5;
+  },
     APLUS: s => {
       let score = 0;
 
