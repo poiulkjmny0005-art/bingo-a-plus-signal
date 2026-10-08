@@ -814,7 +814,7 @@ let totalHitPeriod = 0;
 
 const maxBackTests = Math.min(200, history.length - 32);
 
-for (let start = 12; start < 12 + maxBackTests; start++) {
+for (let start = 12; start < 12 + maxBackTests; start += 12) {
 
   // 只能使用當時已經知道的歷史資料
   // 避免偷看到未來資料
