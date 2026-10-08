@@ -4,8 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
+
 permissions:
   contents: write
+
 jobs:
   scan:
     runs-on: ubuntu-latest
@@ -20,7 +22,9 @@ jobs:
           node-version: "20"
 
       - name: Run Bingo Scanner
-            - name: Save 12-period tracking
+        run: node scanner_v61.js
+
+      - name: Save 12-period tracking
         run: |
           if [ -f aplus_v61_tracking.json ]; then
             git config user.name "github-actions[bot]"
@@ -33,4 +37,3 @@ jobs:
           else
             echo "Tracking file not generated"
           fi
-        run: node scanner_v61.js
