@@ -1,0 +1,22 @@
+name: Bingo Super A+ v6.3 Research
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v6.3 research
+        run: node super_v63_research.js --days=10
+      - name: Upload research results
+        uses: actions/upload-artifact@v4
+        with:
+          name: v6.3-report
+          path: |
+            super_v63_report.json
+            super_v63_comparison.csv
