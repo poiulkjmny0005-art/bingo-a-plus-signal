@@ -936,7 +936,17 @@ if (testCount > 0) {
   ).toFixed(2);
 
   console.log("🎯 12期命中率：" + hitRate + "%");
+const randomRate = (1 - Math.pow(79 / 80, 12)) * 100;
 
+console.log(
+  "🎲 隨機基準：" + randomRate.toFixed(2) + "%"
+);
+
+console.log(
+  "📊 超越隨機：" +
+  (Number(hitRate) - randomRate).toFixed(2) +
+  " 個百分點"
+);
 }
 
 if (hitCount > 0) {
