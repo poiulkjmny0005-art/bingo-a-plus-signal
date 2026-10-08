@@ -60,6 +60,7 @@ const gapPattern=(n,h)=>{
 };
 const models={
   '近10期熱度':(n,h)=>frequency(n,h,10),
+  '10對20期熱度變化':(n,h)=>2*frequency(n,h,10)-frequency(n,h,20),
   '近30期熱度':(n,h)=>frequency(n,h,30),
   '近50期熱度':(n,h)=>frequency(n,h,50),
   '近100期熱度':(n,h)=>frequency(n,h,100),
@@ -111,5 +112,70 @@ for(const k of stars){
  records.push([k,name,validation,(v.total/validation).toFixed(5),holdout,(r.total/holdout).toFixed(5),percent(any/holdout),percent(baseline),...Array.from({length:6},(_,j)=>r.counts[j]??'')]);
 }
 fs.writeFileSync('star345_summary.csv',records.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')+'\n');
+
+// Generate ten different combinations per star size. Model weights come only from
+// validation, not from the untouched holdout; no forward predictive edge is assumed.
+const scoreNames=['近50期熱度','50期熱度加速','50期直線連莊','50期斜線相鄰','50期密集區域','10對20期熱度變化','50期間隔2至5期'];
+const factorWeights=[
+ [3,2,1,1,1,1,1], [2,3,1,1,1,2,1], [2,1,3,1,1,1,2],
+ [2,1,1,3,1,1,1], [2,1,1,1,3,1,1], [1,2,2,1,2,1,1],
+ [2,2,1,2,1,1,1], [2,1,2,1,2,1,1], [1,2,1,2,2,2,1],
+ [2,2,2,2,2,1,1]
+];
+const validationMeans=Object.fromEntries(scoreNames.map(name=>[name,Object.fromEntries(stars.map(k=>[k,validationResults[name][k].total/validation]))]));
+const latest=draws;
+const raw=Object.fromEntries(scoreNames.map(name=>[name,Array.from({length:80},(_,i)=>models[name](i+1,latest))]));
+const normalized=Object.fromEntries(scoreNames.map(name=>{
+ const v=raw[name], min=Math.min(...v), max=Math.max(...v);
+ return [name,v.map(x=>max===min?0.5:(x-min)/(max-min))];
+}));
+const csvGroups=[['star','group','numbers','focus','validation_reference','latest_period']];
+function comboGroups(k){
+ const generated=[];
+ for(let g=0;g<10;g++){
+   const weights=factorWeights[g];
+   const candidates=Array.from({length:80},(_,i)=>{
+     const n=i+1;
+     let score=0;
+     for(let j=0;j<scoreNames.length;j++){
+       const name=scoreNames[j];
+       // Bounded validation performance adjustment: no holdout peeking.
+       const relative=validationMeans[name][k]/(k/4);
+       const reliability=Math.max(0.7,Math.min(1.3,relative));
+       score+=weights[j]*reliability*normalized[name][i];
+     }
+     // Change tie ordering between groups, without using future data.
+     return {n,score};
+   });
+   const chosen=[];
+   for(let slot=0;slot<k;slot++){
+     const sorted=candidates.filter(x=>!chosen.includes(x.n)).map(x=>{
+       const overlap=generated.reduce((sum,prior)=>sum+prior.includes(x.n),0);
+       const nearby=chosen.filter(n=>Math.abs(n-x.n)<=2).length;
+       return {...x,adjusted:x.score-overlap*(1.0+g*.11)-nearby*.35};
+     }).sort((a,b)=>b.adjusted-a.adjusted||a.n-b.n);
+     let pick=sorted[0].n;
+     // Avoid reproducing an identical complete ticket.
+     if(slot===k-1){
+       const alternate=sorted.find(x=>!generated.some(prior=>[...chosen,x.n].sort((a,b)=>a-b).join(',')===prior.join(',')));
+       if(alternate)pick=alternate.n;
+     }
+     chosen.push(pick);
+   }
+   chosen.sort((a,b)=>a-b);
+   generated.push(chosen);
+   const focus=scoreNames[weights.indexOf(Math.max(...weights))];
+   const formatted=chosen.map(n=>String(n).padStart(2,'0')).join('、');
+   console.log(`第${String(g+1).padStart(2,'0')}組：${formatted}｜側重 ${focus}`);
+   csvGroups.push([k,g+1,chosen.map(n=>String(n).padStart(2,'0')).join(' '),focus,'策略權重只參考驗證區',draws.at(-1).period]);
+ }
+}
+console.log('\n=== 50期走勢綜合評分：每種星數10組（共30組）===');
+console.log('綜合：50期熱度、10/20期熱度變化、直線連莊、斜線相鄰、密集區域、間隔；使用驗證區策略成績調整權重。');
+console.log('每組都是不同的號碼組合，並施加重複號碼懲罰；10組並非獨立，也不代表更高期望報酬。');
+for(const k of stars){console.log(`\n--- ${k} 星：10組 ---`);comboGroups(k);}
+fs.writeFileSync('star345_groups.csv',csvGroups.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')+'\n');
+console.log('\n已輸出 star345_groups.csv（如需下載此檔，需將它加入工作流程的 artifact path）。');
+
 console.log('\n已輸出 star345_summary.csv。此版未計算獎金/報酬率，須先核對官方星數賠付表與投注金額。');
 console.log('提醒：公平獨立開獎下，歷史熱門或冷號不會改變每顆號碼下一期25%的機率。');
