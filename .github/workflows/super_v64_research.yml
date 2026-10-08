@@ -35,7 +35,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Update A+ v6.4 forward research tracking"
             git push
-
+          fi
       - name: Upload v6.4 report
         uses: actions/upload-artifact@v4
         with:
