@@ -812,7 +812,7 @@ let hitCount = 0;
 let missCount = 0;
 let totalHitPeriod = 0;
 
-const maxBackTests = Math.min(50, history.length - 32);
+const maxBackTests = Math.min(200, history.length - 32);
 
 for (let start = 12; start < 12 + maxBackTests; start++) {
 
