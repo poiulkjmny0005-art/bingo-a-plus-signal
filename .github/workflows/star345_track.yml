@@ -1,0 +1,41 @@
+name: Bingo Star 345 Auto Tracking
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: star345-tracking
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch draw history
+        run: node fetch_history.js --days=14 --out=history.csv
+      - name: Track 30 groups
+        run: node star345_track.js history.csv
+      - name: Save tracking results
+        run: |
+          if [ -f star345_tracking.json ]; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add star345_tracking.json
+            if ! git diff --cached --quiet; then
+              git commit -m 'Update star345 tracking'
+              git push
+            fi
+          fi
