@@ -1,0 +1,31 @@
+name: Bingo Star 3 4 5 Backtest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  star345:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch 20-number history
+        run: node fetch_history.js --days=14 --output=history.csv
+      - name: Backtest 3 4 5 stars
+        run: node star345_backtest.js history.csv --warmup=200 --validation=500 --holdout=500
+      - name: Save backtest CSV artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: star345-results
+          path: |
+            history.csv
+            star345_summary.csv
+          if-no-files-found: warn
