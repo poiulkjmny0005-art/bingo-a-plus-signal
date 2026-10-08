@@ -26,6 +26,8 @@ jobs:
           node-version: '20'
       - name: Fetch draw history
         run: node fetch_history.js --days=14 --out=history.csv
+      - name: Generate 30 groups
+        run: node star345_backtest.js history.csv --warmup=200 --validation=500 --holdout=500
       - name: Track 30 groups
         run: node star345_track.js history.csv
       - name: Save tracking results
