@@ -1,0 +1,61 @@
+
+name: Bingo 3-Star A+ v2.1 Forward Comparison
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: star3-v21-forward
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch history
+        run: node fetch_history.js --days=14 --out=history.csv
+
+      - name: Track two frozen 3-star methods
+        run: node star3_v21_track.js history.csv
+
+      - name: Commit independent forward results
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add star3_v21_forward_tracking.json star3_v21_forward_report.csv star3_v21_summary.csv
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update independent 3-star v2.1 forward tracking'
+            for attempt in 1 2 3; do
+              git pull --rebase origin "${GITHUB_REF_NAME}"
+              if git push origin "HEAD:${GITHUB_REF_NAME}"; then exit 0; fi
+              sleep 5
+            done
+            echo 'Push failed after retries' >&2
+            exit 1
+          fi
+
+      - name: Upload research report
+        uses: actions/upload-artifact@v4
+        with:
+          name: star3-v21-forward-results
+          path: |
+            star3_v21_forward_tracking.json
+            star3_v21_forward_report.csv
+            star3_v21_summary.csv
