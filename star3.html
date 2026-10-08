@@ -1,49 +1,600 @@
+
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1220">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
 <title>3星 A+ v2.1｜雙策略追蹤</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1220;--panel:#141f32;--line:#29384f;--text:#edf3ff;--muted:#9caec7;--a:#69b5ff;--b:#a6edc5;--good:#4ade80;--warn:#f9c66e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Segoe UI",sans-serif;font-size:15px;line-height:1.5}.wrap{max-width:780px;margin:auto;padding:22px 16px 70px}header{display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:23px;margin:0;letter-spacing:.2px}h2{font-size:17px;margin:0 0 12px}p{margin:6px 0}.sub,.muted{color:var(--muted)}.sub{font-size:12px}.panel{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px;margin-top:15px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 9px;color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{border:1px solid var(--line);border-radius:12px;padding:12px}.stat strong{font-size:25px;display:block;font-variant-numeric:tabular-nums}.stat small{color:var(--muted)}.strategies{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.strategy{border:1px solid var(--line);background:#101a2b;color:var(--text);padding:12px 6px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}.strategy[aria-selected=true]{background:#1b314b;border-color:var(--a)}.strategy:nth-child(2)[aria-selected=true]{border-color:var(--b)}.ticket{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 2px;border-bottom:1px solid var(--line)}.ticket:last-child{border-bottom:0}.ticketno{color:var(--muted);width:27px;font-size:13px}.balls{display:flex;gap:7px;flex:1}.ball{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:800;background:#243751;border:1px solid #426083;font-variant-numeric:tabular-nums}.ball.hit{background:#1c5c42;border-color:#4ade80;color:#d4ffe3}.hittext{min-width:52px;text-align:right;color:var(--muted);font-size:13px}.hittext.full{color:var(--good);font-weight:800}.badge{padding:5px 10px;border-radius:8px;background:#22334b;color:#c5d7f2;font-size:12px}.badge.pending{color:var(--warn)}.badge.settled{color:var(--good)}button.refresh{background:#2b69a8;color:white;border:0;border-radius:10px;padding:10px 13px;font-weight:700;cursor:pointer}button:disabled{opacity:.5}.line{border-top:1px solid var(--line);margin:14px 0}.history{display:flex;flex-direction:column;gap:8px}.historyrow{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);padding:9px 10px;border-radius:10px;font-size:13px}.historyrow span:last-child{font-weight:700}.notice{font-size:12px;color:var(--muted);margin-top:18px}.error{color:#ffc0c0;overflow-wrap:anywhere}.empty{padding:20px 0;text-align:center;color:var(--muted)}a{color:#9dd1ff}footer{padding:15px 0;color:var(--muted);font-size:12px}@media(min-width:620px){.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}.two .panel{margin-top:15px}}@media(max-width:360px){.ball{width:37px;height:37px}.balls{gap:5px}.wrap{padding-left:11px;padding-right:11px}}
+:root {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --panel: #141f32;
+  --line: #29384f;
+  --text: #edf3ff;
+  --muted: #9caec7;
+  --good: #4ade80;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Noto Sans TC", sans-serif;
+  font-size: 15px;
+}
+.wrap {
+  max-width: 780px;
+  margin: auto;
+  padding: 20px 14px 60px;
+}
+header, .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+h1 { font-size: 23px; margin: 5px 0; }
+h2 { font-size: 17px; margin: 0 0 12px; }
+p { line-height: 1.6; }
+.muted, .sub { color: var(--muted); }
+.sub { font-size: 12px; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 15px;
+  margin-top: 15px;
+}
+button {
+  cursor: pointer;
+  color: white;
+  border-radius: 10px;
+  font-weight: bold;
+}
+.refresh {
+  background: #2b69a8;
+  border: 0;
+  padding: 11px 14px;
+  white-space: nowrap;
+}
+.refresh:disabled { opacity: .5; }
+.chip, .badge {
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: #22334b;
+  font-size: 12px;
+}
+.pending { color: #f9c66e; }
+.settled { color: var(--good); }
+.strategies {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 15px 0;
+}
+.strategy {
+  padding: 13px 5px;
+  background: #101a2b;
+  border: 1px solid var(--line);
+}
+.strategy[aria-selected="true"] {
+  background: #1b314b;
+  border-color: #69b5ff;
+}
+.ticket {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ticketno {
+  width: 24px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.balls {
+  display: flex;
+  gap: 7px;
+  flex: 1;
+}
+.ball {
+  width: 41px;
+  height: 41px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #243751;
+  border: 1px solid #426083;
+  font-size: 17px;
+  font-weight: 800;
+}
+.hittext {
+  min-width: 54px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 13px;
+}
+.full { color: var(--good); font-weight: bold; }
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.stat {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+}
+.stat small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+.stat strong {
+  display: block;
+  font-size: 23px;
+  margin-top: 5px;
+}
+.historyrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 7px 0;
+  font-size: 13px;
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 22px 0;
+}
+.error { color: #ffc0c0; }
+.notice {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 20px;
+}
+a { color: #9dd1ff; }
+@media(max-width: 500px) {
+  .two { grid-template-columns: 1fr; }
+}
 </style>
 </head>
-<body><main class="wrap">
-<header><div><div class="sub">BINGO · 3-STAR FORWARD TEST</div><h1>3星 A+ <span style="color:#7fc4ff">v2.1</span></h1><p class="muted">雙策略｜每期各10組｜真實後續追蹤</p></div><button class="refresh" id="refresh" type="button">↻ 更新</button></header>
-<section class="panel"><div class="top"><strong>追蹤資料狀態</strong><span id="status" class="chip">讀取中…</span></div><p class="sub" id="updated">尚未取得資料</p><p id="message" class="sub"></p></section>
-<section class="panel"><div class="top"><h2>最新一批號碼</h2><span id="batchstatus" class="badge">—</span></div><p class="sub" id="period">期號：—</p><div class="strategies" role="tablist" aria-label="策略切換"><button class="strategy" id="tab-strong" role="tab" aria-selected="true" type="button">強化分散</button><button class="strategy" id="tab-uniform" role="tab" aria-selected="false" type="button">平均分散</button></div><div id="tickets" aria-live="polite" class="empty">正在讀取號碼…</div><p class="sub" id="ticketnote"></p></section>
-<div class="two"><section class="panel"><h2>強化分散 <span class="sub">DIVERSE_STRONG</span></h2><div class="stats"><div class="stat"><small>至少1組全中的期數</small><strong id="strong-full">—</strong></div><div class="stat"><small>實際全中率</small><strong id="strong-rate">—</strong></div></div><p class="sub" id="strong-extra">—</p></section><section class="panel"><h2>平均分散 <span class="sub">DIVERSE_UNIFORM</span></h2><div class="stats"><div class="stat"><small>至少1組全中的期數</small><strong id="uniform-full">—</strong></div><div class="stat"><small>實際全中率</small><strong id="uniform-rate">—</strong></div></div><p class="sub" id="uniform-extra">—</p></section></div>
-<section class="panel"><h2>最近核對紀錄</h2><div class="history" id="history"><div class="empty">尚無已核對期數</div></div></section>
-<p class="notice">說明：本頁只顯示 GitHub 已儲存的預測與核對結果，不會自行開獎或預測。核對完成後會顯示每組命中顆數，不會推測哪些單顆號碼命中。GitHub Actions 排程與 Pages 更新可能延遲；請以官方開獎資料為準。公平獨立開獎下，歷史表現不保證未來中獎。</p>
-<footer>資料來源：<a href="https://github.com/poiulkjmny0005-art/bingo-a-plus-signal/actions" target="_blank" rel="noopener">GitHub Actions</a>｜獨立研究，不影響原本30組系統</footer>
+<body>
+<main class="wrap">
+
+<header>
+  <div>
+    <div class="sub">BINGO · 3-STAR FORWARD TEST</div>
+    <h1>3星 A+ <span style="color:#7fc4ff">v2.1</span></h1>
+    <p class="sub">雙策略｜每期各10組｜真實後續追蹤</p>
+  </div>
+  <button class="refresh" id="refresh">↻ 更新</button>
+</header>
+
+<section class="panel">
+  <div class="top">
+    <strong>追蹤資料狀態</strong>
+    <span class="chip" id="status">讀取中…</span>
+  </div>
+  <p class="sub" id="updated">尚未取得資料</p>
+  <p class="sub" id="message"></p>
+</section>
+
+<section class="panel">
+  <div class="top">
+    <h2>最新一批號碼</h2>
+    <span class="badge" id="batchstatus">—</span>
+  </div>
+
+  <p class="sub" id="period">期號：—</p>
+
+  <div class="strategies">
+    <button class="strategy" id="tab-strong"
+      aria-selected="true">強化分散</button>
+    <button class="strategy" id="tab-uniform"
+      aria-selected="false">平均分散</button>
+  </div>
+
+  <div id="tickets" class="empty">正在讀取號碼…</div>
+  <p class="sub" id="ticketnote"></p>
+</section>
+
+<div class="two">
+  <section class="panel">
+    <h2>強化分散 <span class="sub">DIVERSE_STRONG</span></h2>
+    <div class="stats">
+      <div class="stat">
+        <small>至少1組全中的期數</small>
+        <strong id="strong-full">—</strong>
+      </div>
+      <div class="stat">
+        <small>實際全中率</small>
+        <strong id="strong-rate">—</strong>
+      </div>
+    </div>
+    <p class="sub" id="strong-extra">—</p>
+  </section>
+
+  <section class="panel">
+    <h2>平均分散 <span class="sub">DIVERSE_UNIFORM</span></h2>
+    <div class="stats">
+      <div class="stat">
+        <small>至少1組全中的期數</small>
+        <strong id="uniform-full">—</strong>
+      </div>
+      <div class="stat">
+        <small>實際全中率</small>
+        <strong id="uniform-rate">—</strong>
+      </div>
+    </div>
+    <p class="sub" id="uniform-extra">—</p>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>最近核對紀錄</h2>
+  <div id="history">
+    <div class="empty">尚無已核對期數</div>
+  </div>
+</section>
+
+<p class="notice">
+本頁顯示 GitHub 已儲存的預測與核對結果。
+待開獎時顯示預測號碼；核對完成後顯示每組命中顆數。
+GitHub Actions 排程與 Pages 更新可能延遲。
+公平獨立開獎下，歷史命中率不保證未來結果。
+</p>
+
 </main>
+
 <script>
 'use strict';
-const OWNER='poiulkjmny0005-art',REPO='bingo-a-plus-signal';
-const RAW=`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/`;
-const FILE='star3_v21_forward_tracking.json';
-const methods=['DIVERSE_STRONG','DIVERSE_UNIFORM'];
-let state=null,active=methods[0];
-const el=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(2,'0');
-const text=(id,value)=>{el(id).textContent=String(value);};
-function valid(s){return s&&s.version===1&&Array.isArray(s.predictions)&&Array.isArray(s.strategies)&&methods.every(m=>s.strategies.includes(m));}
-async function getState(){const q='?t='+Date.now();const sources=[FILE+q,RAW+FILE+q];let lastError;
- for(const src of sources){try{const r=await fetch(src,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const s=await r.json();if(!valid(s))throw Error('追蹤檔內容格式不符');return s;}catch(e){lastError=e;}}
- throw lastError||Error('無法取得追蹤資料');}
-function ticketRows(batch,method){const container=el('tickets');container.replaceChildren();const tickets=batch?.tickets?.[method];if(!Array.isArray(tickets)){container.className='empty';container.textContent='尚無可顯示的預測組合';return;}
- container.className='';const hits=batch.status==='settled'?batch.hits?.[method]:null;
- tickets.forEach((ticket,i)=>{const row=document.createElement('div');row.className='ticket';const num=document.createElement('span');num.className='ticketno';num.textContent=pad(i+1);row.append(num);const balls=document.createElement('div');balls.className='balls';const hitCount=Array.isArray(hits)?hits[i]:null;
- ticket.forEach(n=>{const ball=document.createElement('span');ball.className='ball';ball.textContent=pad(n);balls.append(ball);});row.append(balls);const outcome=document.createElement('span');outcome.className='hittext'+(hitCount===3?' full':'');outcome.textContent=Number.isInteger(hitCount)?(hitCount===3?'★ 3/3':hitCount+'/3'):'待開獎';row.append(outcome);container.append(row);});
- text('ticketnote',batch.status==='settled'?'此批已核對；右側為每組命中顆數。命中顆數由後端核對結果提供，未提供逐顆命中明細。':'此批尚未核對下一期；號碼僅供研究觀察。');}
-function render(){if(!state)return;const batches=state.predictions;const latest=batches.at(-1);const settled=batches.filter(b=>b.status==='settled');const pending=batches.filter(b=>b.status==='pending');const unverified=batches.filter(b=>b.status==='unverified');
- text('status','已載入 '+batches.length+' 批');text('message',`已核對 ${settled.length} 期｜等待 ${pending.length} 期｜無法確認 ${unverified.length} 期`);
- text('period',latest?`基準期號：${latest.base}${latest.resultPeriod?' → 開獎 '+latest.resultPeriod:''}`:'尚未建立預測');text('batchstatus',latest?({pending:'等待開獎',settled:'已核對',unverified:'無法確認'}[latest.status]||latest.status):'尚無資料');el('batchstatus').className='badge '+(latest?.status||'');
- methods.forEach((m,i)=>{const prefix=i===0?'strong':'uniform';const success=settled.filter(b=>Array.isArray(b.hits?.[m])&&b.hits[m].some(h=>h===3)).length;const tickets=settled.flatMap(b=>Array.isArray(b.hits?.[m])?b.hits[m]:[]);const full=tickets.filter(h=>h===3).length;
- text(prefix+'-full',`${success} / ${settled.length}`);text(prefix+'-rate',settled.length?`${(success/settled.length*100).toFixed(2)}%`:'尚無');text(prefix+'-extra',`3/3 全中票 ${full} 張｜已核對 ${tickets.length} 組次`);});
- const hist=el('history');hist.replaceChildren();if(!settled.length){const e=document.createElement('div');e.className='empty';e.textContent='等待第一期核對結果';hist.append(e);}else settled.slice(-8).reverse().forEach(b=>{const row=document.createElement('div');row.className='historyrow';const left=document.createElement('span');left.textContent=`${b.base} → ${b.resultPeriod||'—'}`;const right=document.createElement('span');const a=Array.isArray(b.hits?.DIVERSE_STRONG)?b.hits.DIVERSE_STRONG.filter(n=>n===3).length:0;const u=Array.isArray(b.hits?.DIVERSE_UNIFORM)?b.hits.DIVERSE_UNIFORM.filter(n=>n===3).length:0;right.textContent=`強 ${a}｜均 ${u}`;row.append(left,right);hist.append(row);});}
- text('tab-strong','強化分散');text('tab-uniform','平均分散');methods.forEach((m,i)=>el(i===0?'tab-strong':'tab-uniform').setAttribute('aria-selected',String(active===m)));ticketRows(latest,active);
+
+const OWNER = 'poiulkjmny0005-art';
+const REPO = 'bingo-a-plus-signal';
+const FILE = 'star3_v21_forward_tracking.json';
+
+const RAW =
+  'https://raw.githubusercontent.com/' +
+  OWNER + '/' + REPO + '/main/' + FILE;
+
+const METHODS = [
+  'DIVERSE_STRONG',
+  'DIVERSE_UNIFORM'
+];
+
+let state = null;
+let active = METHODS[0];
+
+const el = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+
+function setText(id, value) {
+  el(id).textContent = String(value);
 }
-async function refresh(){const btn=el('refresh');btn.disabled=true;text('status','更新中…');text('message','');try{state=await getState();render();text('updated','本頁讀取時間：'+new Date().toLocaleString('zh-TW',{hour12:false}));}catch(e){text('status','無法讀取');text('message','請確認 GitHub 已產生 '+FILE+'，且儲存庫或 Pages 可公開讀取。');el('message').className='sub error';}finally{btn.disabled=false;}}
-methods.forEach((m,i)=>el(i===0?'tab-strong':'tab-uniform').addEventListener('click',()=>{active=m;render();}));el('refresh').addEventListener('click',refresh);refresh();
+
+function valid(data) {
+  return data &&
+    data.version === 1 &&
+    Array.isArray(data.predictions) &&
+    Array.isArray(data.strategies) &&
+    METHODS.every(m => data.strategies.includes(m));
+}
+
+async function getState() {
+  const stamp = '?t=' + Date.now();
+
+  const sources = [
+    FILE + stamp,
+    RAW + stamp
+  ];
+
+  let lastError;
+
+  for (const url of sources) {
+    try {
+      const response = await fetch(url, {
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+
+      const data = await response.json();
+
+      if (!valid(data)) {
+        throw new Error('追蹤資料格式不符');
+      }
+
+      return data;
+
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error('無法取得資料');
+}
+
+function renderTickets(batch, method) {
+  const container = el('tickets');
+  container.replaceChildren();
+
+  const tickets = batch &&
+    batch.tickets &&
+    batch.tickets[method];
+
+  if (!Array.isArray(tickets)) {
+    container.className = 'empty';
+    container.textContent = '尚無可顯示的預測組合';
+    return;
+  }
+
+  container.className = '';
+
+  const hits = batch.status === 'settled'
+    ? batch.hits && batch.hits[method]
+    : null;
+
+  tickets.forEach((ticket, index) => {
+    const row = document.createElement('div');
+    row.className = 'ticket';
+
+    const number = document.createElement('span');
+    number.className = 'ticketno';
+    number.textContent = pad(index + 1);
+    row.append(number);
+
+    const balls = document.createElement('div');
+    balls.className = 'balls';
+
+    ticket.forEach(n => {
+      const ball = document.createElement('span');
+      ball.className = 'ball';
+      ball.textContent = pad(n);
+      balls.append(ball);
+    });
+
+    row.append(balls);
+
+    const hitCount = Array.isArray(hits)
+      ? hits[index]
+      : null;
+
+    const result = document.createElement('span');
+    result.className = 'hittext';
+
+    if (Number.isInteger(hitCount)) {
+      result.textContent = hitCount === 3
+        ? '★ 3/3'
+        : hitCount + '/3';
+
+      if (hitCount === 3) {
+        result.classList.add('full');
+      }
+    } else {
+      result.textContent = '待開獎';
+    }
+
+    row.append(result);
+    container.append(row);
+  });
+
+  setText(
+    'ticketnote',
+    batch.status === 'settled'
+      ? '此批已核對，右側為每組命中顆數。'
+      : '此批等待核對下一期開獎結果。'
+  );
+}
+
+function render() {
+  if (!state) return;
+
+  const batches = state.predictions;
+
+  const latest = batches.length
+    ? batches[batches.length - 1]
+    : null;
+
+  const settled = batches.filter(
+    b => b.status === 'settled'
+  );
+
+  const pending = batches.filter(
+    b => b.status === 'pending'
+  );
+
+  const unverified = batches.filter(
+    b => b.status === 'unverified'
+  );
+
+  setText('status', '已載入 ' + batches.length + ' 批');
+
+  setText(
+    'message',
+    '已核對 ' + settled.length +
+    ' 期｜等待 ' + pending.length +
+    ' 期｜無法確認 ' + unverified.length + ' 期'
+  );
+
+  setText(
+    'period',
+    latest
+      ? '基準期號：' + latest.base +
+        (latest.resultPeriod
+          ? ' → 開獎 ' + latest.resultPeriod
+          : '')
+      : '尚未建立預測'
+  );
+
+  const statusNames = {
+    pending: '等待開獎',
+    settled: '已核對',
+    unverified: '無法確認'
+  };
+
+  setText(
+    'batchstatus',
+    latest
+      ? (statusNames[latest.status] || latest.status)
+      : '尚無資料'
+  );
+
+  el('batchstatus').className =
+    'badge ' + (latest ? latest.status : '');
+
+  METHODS.forEach((method, index) => {
+    const prefix = index === 0 ? 'strong' : 'uniform';
+
+    const success = settled.filter(batch => {
+      const hits = batch.hits && batch.hits[method];
+      return Array.isArray(hits) && hits.includes(3);
+    }).length;
+
+    const allHits = settled.flatMap(batch => {
+      const hits = batch.hits && batch.hits[method];
+      return Array.isArray(hits) ? hits : [];
+    });
+
+    const fullTickets = allHits.filter(
+      h => h === 3
+    ).length;
+
+    setText(
+      prefix + '-full',
+      success + ' / ' + settled.length
+    );
+
+    setText(
+      prefix + '-rate',
+      settled.length
+        ? (success / settled.length * 100).toFixed(2) + '%'
+        : '尚無'
+    );
+
+    setText(
+      prefix + '-extra',
+      '3/3 全中票 ' + fullTickets +
+      ' 張｜已核對 ' + allHits.length + ' 組次'
+    );
+  });
+
+  const history = el('history');
+  history.replaceChildren();
+
+  if (!settled.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = '等待第一期核對結果';
+    history.append(empty);
+  } else {
+    settled.slice(-8).reverse().forEach(batch => {
+      const row = document.createElement('div');
+      row.className = 'historyrow';
+
+      const left = document.createElement('span');
+      left.textContent =
+        batch.base + ' → ' +
+        (batch.resultPeriod || '—');
+
+      const right = document.createElement('span');
+
+      const strongHits = batch.hits &&
+        batch.hits.DIVERSE_STRONG;
+
+      const uniformHits = batch.hits &&
+        batch.hits.DIVERSE_UNIFORM;
+
+      const strongFull = Array.isArray(strongHits)
+        ? strongHits.filter(n => n === 3).length
+        : 0;
+
+      const uniformFull = Array.isArray(uniformHits)
+        ? uniformHits.filter(n => n === 3).length
+        : 0;
+
+      right.textContent =
+        '強 ' + strongFull + '｜均 ' + uniformFull;
+
+      row.append(left, right);
+      history.append(row);
+    });
+  }
+
+  el('tab-strong').setAttribute(
+    'aria-selected',
+    String(active === METHODS[0])
+  );
+
+  el('tab-uniform').setAttribute(
+    'aria-selected',
+    String(active === METHODS[1])
+  );
+
+  if (latest) {
+    renderTickets(latest, active);
+  } else {
+    el('tickets').textContent = '尚無預測資料';
+  }
+}
+
+async function refresh() {
+  const button = el('refresh');
+
+  button.disabled = true;
+  setText('status', '更新中…');
+  setText('message', '');
+
+  try {
+    state = await getState();
+    render();
+
+    setText(
+      'updated',
+      '本頁讀取時間：' +
+      new Date().toLocaleString('zh-TW', {
+        hour12: false
+      })
+    );
+
+  } catch (error) {
+    setText('status', '無法讀取');
+    setText('message', '錯誤：' + error.message);
+    el('message').className = 'sub error';
+
+  } finally {
+    button.disabled = false;
+  }
+}
+
+el('tab-strong').addEventListener('click', () => {
+  active = METHODS[0];
+  render();
+});
+
+el('tab-uniform').addEventListener('click', () => {
+  active = METHODS[1];
+  render();
+});
+
+el('refresh').addEventListener('click', refresh);
+
+refresh();
 </script>
-</body></html>
+</body>
+</html>
