@@ -1,0 +1,27 @@
+name: Bingo 3-Star A+ v2 Research
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch history
+        run: node fetch_history.js --days=14 --out=history.csv
+      - name: Run independent 3-star research
+        run: node star3_v2_research.js history.csv --warmup=200 --validation=500 --holdout=500
+      - name: Upload research files
+        uses: actions/upload-artifact@v4
+        with:
+          name: star3-v2-research-report
+          path: |
+            star3_v2_comparison.csv
+            star3_v2_research_groups.csv
