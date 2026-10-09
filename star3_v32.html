@@ -1,0 +1,565 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三星 V3.2 A版｜整合精選</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#09111f;
+  --card:#17243a;
+  --line:#30415d;
+  --text:#f5f8ff;
+  --muted:#a9b9d2;
+  --green:#35d49a;
+  --gold:#ffc86b;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,
+    "Noto Sans TC",sans-serif;
+}
+main {
+  max-width:720px;
+  margin:auto;
+  padding:18px 14px 45px;
+}
+header { text-align:center; padding:15px 0; }
+h1 { margin:0; font-size:25px; }
+.subtitle {
+  color:var(--muted);
+  margin-top:9px;
+  font-size:13px;
+}
+.card {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:19px;
+  padding:18px;
+  margin:14px 0;
+}
+h2 { margin:0 0 15px; font-size:19px; }
+h3 { margin:0 0 10px; font-size:15px; }
+.small { font-size:13px; color:var(--muted); }
+.row {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.metric {
+  background:#22324b;
+  border-radius:12px;
+  padding:13px;
+}
+.metric .value {
+  font-size:22px;
+  font-weight:800;
+  margin-top:5px;
+}
+.green { color:var(--green); }
+.gold { color:var(--gold); }
+.balls {
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin:12px 0;
+}
+.ball {
+  width:51px;
+  height:51px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#344d6d;
+  border:1px solid #6789b0;
+  font-size:21px;
+  font-weight:800;
+}
+.ball.hit {
+  background:#167b59;
+  border-color:var(--green);
+  color:#fff;
+}
+.selection {
+  background:#20314c;
+  border-radius:14px;
+  padding:15px;
+  margin:12px 0;
+}
+.selection.winner {
+  border:1px solid var(--green);
+}
+.ticket {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+.ticket:last-child { border-bottom:0; }
+.ticket .index {
+  width:27px;
+  color:var(--muted);
+  flex-shrink:0;
+}
+.ticket .balls { margin:0; gap:6px; }
+.ticket .ball {
+  width:39px;
+  height:39px;
+  font-size:16px;
+}
+.status {
+  margin-left:auto;
+  font-size:12px;
+  color:var(--muted);
+  text-align:right;
+}
+button {
+  width:100%;
+  border:0;
+  border-radius:12px;
+  background:var(--green);
+  color:#08221b;
+  padding:13px;
+  font-size:16px;
+  font-weight:800;
+}
+.history {
+  padding:13px 0;
+  border-bottom:1px solid var(--line);
+}
+.history:last-child { border-bottom:0; }
+.note {
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.7;
+}
+#error { color:#ff9e9e; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🎯 三星 V3.2 A版</h1>
+  <div class="subtitle">
+    10組整合精選｜6顆不重複｜真實前瞻追蹤
+  </div>
+</header>
+
+<section class="card">
+  <div class="row">
+    <strong>雲端資料狀態</strong>
+    <span id="status" class="small">載入中...</span>
+  </div>
+  <p id="updated" class="small">讀取最新紀錄中</p>
+  <p id="error"></p>
+  <button onclick="loadAll()">立即更新資料</button>
+</section>
+
+<section class="card">
+  <h2>最新預測期號</h2>
+  <div class="grid">
+    <div class="metric">
+      <div class="small">基準期號</div>
+      <div id="base" class="value">—</div>
+    </div>
+    <div class="metric">
+      <div class="small">預測目標期號</div>
+      <div id="target" class="value green">—</div>
+    </div>
+  </div>
+  <p id="predictionStatus" class="small"></p>
+</section>
+
+<section class="card">
+  <h2>⭐ A版整合精選</h2>
+  <div class="small">
+    從原本10組中，分別取自6個不同來源組合。
+  </div>
+  <div id="selections">
+    <p class="small">讀取精選號碼中...</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>原本10組三星號碼</h2>
+  <div id="tickets">
+    <p class="small">讀取10組號碼中...</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>📊 真實前瞻測試成績</h2>
+  <div class="grid">
+    <div class="metric">
+      <div class="small">V3.2 已核獎</div>
+      <div id="settled" class="value">0</div>
+    </div>
+    <div class="metric">
+      <div class="small">待核獎</div>
+      <div id="pending" class="value">0</div>
+    </div>
+    <div class="metric">
+      <div class="small">精選1組全中期數</div>
+      <div id="oneWins" class="value green">0</div>
+    </div>
+    <div class="metric">
+      <div class="small">精選2組至少1組全中</div>
+      <div id="twoWins" class="value green">0</div>
+    </div>
+    <div class="metric">
+      <div class="small">精選1組命中率</div>
+      <div id="oneRate" class="value">0%</div>
+    </div>
+    <div class="metric">
+      <div class="small">精選2組命中率</div>
+      <div id="twoRate" class="value">0%</div>
+    </div>
+  </div>
+  <p class="note">
+    命中率只計算已核獎的預測期數。
+    精選2組代表兩組中至少一組三星全中。
+    兩種方案的投注組數不同，不能直接當成
+    相同成本的命中率比較。
+  </p>
+</section>
+
+<section class="card">
+  <h2>📋 最近核獎紀錄</h2>
+  <div id="history">尚無紀錄</div>
+</section>
+
+<p class="note">
+  本網頁只讀取 GitHub 已儲存的預測與核獎資料，
+  不會用開獎後的結果重新選號。
+  GitHub Actions 可能延遲或漏期。
+  歷史熱度與來源分散不保證提高中獎機率。
+</p>
+</main>
+
+<script>
+const V31 = "star3_v3_tracking.json";
+const V32 = "star3_v32_tracking.json";
+
+const $ = id => document.getElementById(id);
+
+function fmt(n) {
+  return String(n).padStart(2, "0");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    })[c]
+  );
+}
+
+function balls(ticket, hits = []) {
+  if (!Array.isArray(ticket)) return "";
+
+  const matched = new Set(hits.map(Number));
+
+  return '<div class="balls">' +
+    ticket.map(n =>
+      '<span class="ball ' +
+      (matched.has(Number(n)) ? "hit" : "") +
+      '">' + fmt(n) + '</span>'
+    ).join("") +
+    '</div>';
+}
+
+function sortedBatches(data) {
+  return [...(data.batches || [])].sort(
+    (a, b) =>
+      Number(b.targetPeriod) -
+      Number(a.targetPeriod)
+  );
+}
+
+function resultFor(batch, index) {
+  const results = batch.twoResults;
+
+  if (Array.isArray(results) && results[index]) {
+    return results[index];
+  }
+
+  if (
+    batch.status === "settled" &&
+    Array.isArray(batch.actualNumbers)
+  ) {
+    const ticket = batch.selectedTwo?.[index] || [];
+    const actual = new Set(
+      batch.actualNumbers.map(Number)
+    );
+    const hits = ticket.filter(
+      n => actual.has(Number(n))
+    );
+    return {
+      hits,
+      hitCount:hits.length,
+      fullHit:hits.length === 3
+    };
+  }
+
+  return null;
+}
+
+function renderSelection(batch) {
+  const groups = batch.selectedTwo || [];
+  if (groups.length !== 2) {
+    return '<p class="small">尚無完整的2組精選。</p>';
+  }
+
+  const all = groups.flat();
+  const unique = new Set(all.map(Number)).size === 6;
+
+  let html = "";
+
+  groups.forEach((ticket, i) => {
+    const result = resultFor(batch, i);
+    const count = result
+      ? Number(result.hitCount)
+      : null;
+
+    html +=
+      '<div class="selection ' +
+      (count === 3 ? "winner" : "") +
+      '">' +
+      '<h3>精選第' + (i + 1) + '組</h3>' +
+      balls(ticket, result?.hits || []) +
+      '<div class="' +
+      (count === 3 ? "green" : "small") +
+      '">' +
+      (count === null
+        ? "尚未核獎"
+        : count === 3
+          ? "🎉 三星全中！3 / 3"
+          : "命中 " + count + " / 3 顆") +
+      '</div></div>';
+  });
+
+  html += '<p class="small">' +
+    (unique
+      ? "✓ 兩組合計6顆不同號碼"
+      : "注意：這期不是6顆不重複號碼，可能是舊版預測") +
+    '</p>';
+
+  return html;
+}
+
+function renderTickets(batch, draw) {
+  const tickets = batch?.originalTickets ||
+    draw?.tickets || [];
+
+  if (!tickets.length) {
+    return '<p class="small">找不到這一期的原始10組。</p>';
+  }
+
+  const actual = batch?.status === "settled" &&
+    Array.isArray(batch.actualNumbers)
+      ? new Set(batch.actualNumbers.map(Number))
+      : null;
+
+  return tickets.map((ticket, i) => {
+    const hits = actual
+      ? ticket.filter(n => actual.has(Number(n)))
+      : [];
+
+    return '<div class="ticket">' +
+      '<span class="index">' +
+      fmt(i + 1) + '</span>' +
+      balls(ticket, hits) +
+      '<span class="status">' +
+      (actual
+        ? hits.length + "/3"
+        : "待核獎") +
+      '</span></div>';
+  }).join("");
+}
+
+function renderHistory(batches) {
+  if (!batches.length) {
+    $("history").textContent = "尚無預測紀錄";
+    return;
+  }
+
+  $("history").innerHTML = batches.slice(0, 20)
+    .map(b => {
+      const groups = b.selectedTwo || [];
+      const settled = b.status === "settled";
+
+      const lines = groups.map((ticket, i) => {
+        const result = resultFor(b, i);
+        const count = result?.hitCount;
+
+        return '<div class="row small">' +
+          '<span>第' + (i + 1) + '組：' +
+          escapeHTML(ticket.map(fmt).join(" ")) +
+          '</span>' +
+          '<span class="' +
+          (count === 3 ? "green" : "") +
+          '">' +
+          (count == null
+            ? "待核獎"
+            : count === 3
+              ? "✓ 三星全中"
+              : count + "/3") +
+          '</span></div>';
+      }).join("");
+
+      return '<div class="history">' +
+        '<div class="row">' +
+        '<strong>第' +
+        escapeHTML(b.targetPeriod) +
+        '期</strong>' +
+        '<span class="small">' +
+        (settled ? "已核獎" : "待核獎") +
+        '</span></div>' +
+        lines +
+        '</div>';
+    }).join("");
+}
+
+async function readJSON(file) {
+  const response = await fetch(
+    file + "?t=" + Date.now(),
+    { cache:"no-store" }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      file + " 讀取失敗：" + response.status
+    );
+  }
+
+  return response.json();
+}
+
+let loading = false;
+
+async function loadAll() {
+  if (loading) return;
+  loading = true;
+
+  $("status").textContent = "更新中...";
+  $("error").textContent = "";
+
+  try {
+    const [v31, v32] = await Promise.all([
+      readJSON(V31),
+      readJSON(V32)
+    ]);
+
+    const batches = sortedBatches(v32);
+    const latest = batches[0];
+
+    if (!latest) {
+      throw new Error("V3.2 尚無預測資料");
+    }
+
+    const v31Batch = (v31.batches || []).find(
+      b => String(b.targetPeriod) ===
+        String(latest.targetPeriod)
+    );
+
+    $("base").textContent =
+      latest.basePeriod || "—";
+
+    $("target").textContent =
+      latest.targetPeriod || "—";
+
+    $("predictionStatus").textContent =
+      latest.status === "settled"
+        ? "這一期已完成核獎"
+        : "這一期尚未完成核獎";
+
+    $("selections").innerHTML =
+      renderSelection(latest);
+
+    $("tickets").innerHTML =
+      renderTickets(latest, v31Batch);
+
+    const settledBatches = batches.filter(
+      b => b.status === "settled"
+    );
+
+    const settled = settledBatches.length;
+    const pending = batches.filter(
+      b => b.status === "pending"
+    ).length;
+
+    const oneWins = settledBatches.filter(
+      b => b.oneWin === true ||
+        resultFor(b, 0)?.hitCount === 3
+    ).length;
+
+    const twoWins = settledBatches.filter(
+      b => b.twoWin === true ||
+        [0, 1].some(
+          i => resultFor(b, i)?.hitCount === 3
+        )
+    ).length;
+
+    $("settled").textContent = settled;
+    $("pending").textContent = pending;
+    $("oneWins").textContent = oneWins;
+    $("twoWins").textContent = twoWins;
+
+    $("oneRate").textContent = settled
+      ? (oneWins / settled * 100).toFixed(2) + "%"
+      : "—";
+
+    $("twoRate").textContent = settled
+      ? (twoWins / settled * 100).toFixed(2) + "%"
+      : "—";
+
+    renderHistory(batches);
+
+    $("updated").textContent =
+      "資料更新時間：" +
+      new Date().toLocaleString("zh-TW");
+
+    $("status").textContent = "讀取成功";
+
+  } catch (error) {
+    $("status").textContent = "讀取失敗";
+    $("error").textContent = error.message;
+    console.error(error);
+  } finally {
+    loading = false;
+  }
+}
+
+loadAll();
+
+// 每30秒重新讀取GitHub上的資料
+setInterval(loadAll, 30000);
+
+// 手機切回網頁時立即更新
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (!document.hidden) loadAll();
+  }
+);
+</script>
+</body>
+</html>
