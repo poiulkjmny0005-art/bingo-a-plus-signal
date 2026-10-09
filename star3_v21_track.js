@@ -1,5 +1,4 @@
 
-#!/usr/bin/env node
 'use strict';
 // v2.1: forward-only comparison of the TWO fixed v2 algorithms.
 // No production star345_* files are read or modified.
