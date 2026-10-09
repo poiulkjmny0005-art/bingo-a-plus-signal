@@ -1,80 +1,48 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-09T07:05:51.528Z",
-  "latestPeriod": "115057139",
+  "generatedAt": "2026-10-09T07:24:40.985Z",
+  "latestPeriod": "115057143",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 9,
+  "completedRounds": 10,
   "active": {
-    "anchorPeriod": "115057128",
+    "anchorPeriod": "115057140",
     "picks": {
-      "HOT100": 4,
-      "GAP_SHORT": 21
+      "HOT100": 16,
+      "GAP_SHORT": 62
     },
     "draws": [
       {
-        "period": "115057129",
-        "number": 16
+        "period": "115057141",
+        "number": 6
       },
       {
-        "period": "115057130",
-        "number": 34
+        "period": "115057142",
+        "number": 9
       },
       {
-        "period": "115057131",
-        "number": 17
-      },
-      {
-        "period": "115057132",
-        "number": 13
-      },
-      {
-        "period": "115057133",
-        "number": 51
-      },
-      {
-        "period": "115057134",
-        "number": 10
-      },
-      {
-        "period": "115057135",
-        "number": 62
-      },
-      {
-        "period": "115057136",
-        "number": 48
-      },
-      {
-        "period": "115057137",
-        "number": 75
-      },
-      {
-        "period": "115057138",
-        "number": 49
-      },
-      {
-        "period": "115057139",
-        "number": 68
+        "period": "115057143",
+        "number": 32
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 9,
+      "rounds": 10,
       "hits": 0,
       "rate": 0,
       "wilson95": {
         "lower": 0,
-        "upper": 0.2991527535509594
+        "upper": 0.2775401687666166
       }
     },
     "GAP_SHORT": {
-      "rounds": 9,
+      "rounds": 10,
       "hits": 1,
-      "rate": 0.1111111111111111,
+      "rate": 0.1,
       "wilson95": {
-        "lower": 0.019890371327130535,
-        "upper": 0.4350062147680601
+        "lower": 0.01787574951572113,
+        "upper": 0.4041563854975721
       }
     }
   }
