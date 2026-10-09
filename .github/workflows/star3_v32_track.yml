@@ -1,0 +1,49 @@
+name: Track Bingo 3-Star V3.2
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bingo-tracking-v32
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch latest Bingo history
+        run: node fetch_history.js --days=14 --output=history.csv
+
+      - name: Update V3.1 predictions and settlement
+        run: node star3_v3_track.js history.csv
+
+      - name: Run V3.2 combined selections
+        run: node star3_v32_track.js history.csv
+
+      - name: Save tracking results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history.csv star3_v3_tracking.json star3_v3_report.csv star3_v32_tracking.json star3_v32_report.csv
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Bingo V3.1 and V3.2 tracking"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
