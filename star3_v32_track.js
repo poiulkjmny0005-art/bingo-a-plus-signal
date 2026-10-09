@@ -102,119 +102,129 @@ function scoreNumbers(history) {
 function chooseSelections(tickets, history) {
   const score = scoreNumbers(history);
 
-  // 原本10組，共30個號碼位置
-  const pool = [...new Set(tickets.flat())];
+  if (!Array.isArray(tickets) || tickets.length !== 10) {
+    throw new Error("必須提供原始10組三星號碼");
+  }
 
-  // 記錄原始10組，避免直接複製原組合
+  // 每個原始組合挑出1顆，最後從6個不同組合取6顆
+  // 同一號碼若出現在不同原始組合，也不能重複使用
   const originalGroups = new Set(
     tickets.map(t =>
       [...t].sort((a, b) => a - b).join("-")
     )
   );
 
-  // 記錄每顆號碼來自哪些組
-  const sources = new Map();
-
-  tickets.forEach((ticket, groupIndex) => {
-    ticket.forEach(n => {
-      if (!sources.has(n)) {
-        sources.set(n, new Set());
-      }
-      sources.get(n).add(groupIndex);
-    });
-  });
-
-  // 確認每組3顆可以來自至少2個不同原始組合
-  function isCrossGroup(ticket) {
-    const [a, b, c] = ticket;
-
-    for (const x of sources.get(a)) {
-      for (const y of sources.get(b)) {
-        for (const z of sources.get(c)) {
-          if (new Set([x, y, z]).size >= 2) {
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
-  }
-
-  const candidates = [];
-
-  // 將全部號碼重新組合成3星候選
-  for (let i = 0; i < pool.length; i++) {
-    for (let j = i + 1; j < pool.length; j++) {
-      for (let k = j + 1; k < pool.length; k++) {
-        const ticket = [
-          pool[i],
-          pool[j],
-          pool[k]
-        ].sort((a, b) => a - b);
-
-        const key = ticket.join("-");
-
-        // 不採用原本10組的完整組合
-        if (originalGroups.has(key)) continue;
-
-        // 每組必須跨組搭配
-        if (!isCrossGroup(ticket)) continue;
-
-        // 依近期歷史熱度評分
-        const value = ticket.reduce(
-          (sum, n) => sum + score[n],
-          0
-        );
-
-        candidates.push({
-          ticket,
-          value
-        });
-      }
-    }
-  }
-
-  // 分數高的優先
-  candidates.sort((a, b) =>
-    b.value - a.value ||
-    a.ticket.join("-").localeCompare(
-      b.ticket.join("-")
+  // 每組內按歷史評分排序
+  const choices = tickets.map((ticket, groupIndex) =>
+    ticket.map(n => ({
+      number: n,
+      groupIndex,
+      value: score[n]
+    })).sort((a, b) =>
+      b.value - a.value ||
+      a.number - b.number
     )
   );
 
-  // 第一組：取評分最高的跨組三星
-  const first = candidates[0]?.ticket;
+  const candidates = [];
 
-  if (!first) {
-    throw new Error("無法建立第一組跨組精選");
+  // 枚舉10組中任意6組
+  function chooseGroups(start, selected) {
+    if (selected.length === 6) {
+      chooseNumbers(selected, 0, []);
+      return;
+    }
+
+    for (
+      let i = start;
+      i <= 10 - (6 - selected.length);
+      i++
+    ) {
+      chooseGroups(i + 1, [...selected, i]);
+    }
   }
 
-  // 第二組：另外選3顆，不能與第一組重複
-  const second = candidates.find(c =>
-    c.ticket.every(n => !first.includes(n))
-  )?.ticket;
+  // 每個選定的原始組合各取1顆
+  function chooseNumbers(groups, index, selected) {
+    if (index === groups.length) {
+      const numbers = selected.map(x => x.number);
 
-  if (!second) {
-    throw new Error("無法建立第二組不重複精選");
+      if (new Set(numbers).size !== 6) return;
+
+      // 第1組：前3個不同來源組
+      // 第2組：後3個不同來源組
+      const first = selected.slice(0, 3)
+        .map(x => x.number)
+        .sort((a, b) => a - b);
+
+      const second = selected.slice(3, 6)
+        .map(x => x.number)
+        .sort((a, b) => a - b);
+
+      // 不可直接複製原本的三星組合
+      if (originalGroups.has(first.join("-"))) return;
+      if (originalGroups.has(second.join("-"))) return;
+
+      const totalScore = selected.reduce(
+        (sum, x) => sum + x.value, 0
+      );
+
+      candidates.push({
+        first,
+        second,
+        totalScore,
+        sourceGroups: groups.map(i => i + 1)
+      });
+
+      return;
+    }
+
+    const groupIndex = groups[index];
+
+    for (const choice of choices[groupIndex]) {
+      if (selected.some(
+        x => x.number === choice.number
+      )) continue;
+
+      chooseNumbers(
+        groups,
+        index + 1,
+        [...selected, choice]
+      );
+    }
   }
 
-  // 最後再次確認兩組共6顆不同號碼
-  const allSix = [...first, ...second];
+  chooseGroups(0, []);
+
+  if (candidates.length === 0) {
+    throw new Error("無法產生6組來源分散的精選號碼");
+  }
+
+  // 依6顆號碼總歷史評分選出最佳組合
+  candidates.sort((a, b) =>
+    b.totalScore - a.totalScore ||
+    a.first.join("-").localeCompare(
+      b.first.join("-")
+    ) ||
+    a.second.join("-").localeCompare(
+      b.second.join("-")
+    )
+  );
+
+  const best = candidates[0];
+
+  // 再次確認6顆號碼不重複
+  const allSix = [...best.first, ...best.second];
 
   if (new Set(allSix).size !== 6) {
     throw new Error("精選6顆號碼發生重複");
   }
 
   return {
-    // 單組方案：只測試第一組
-    selectedOne: [first],
-
-    // 雙組方案：第一組 + 第二組，共6顆不重複
-    selectedTwo: [first, second]
+    selectedOne: [best.first],
+    selectedTwo: [best.first, best.second]
   };
 }
-
 
 function loadData() {
   if (!fs.existsSync(OUTPUT_FILE)) {
