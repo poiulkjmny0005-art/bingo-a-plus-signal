@@ -97,20 +97,70 @@ function scoreNumbers(history) {
   );
 }
 
+
 function chooseSelections(tickets, history) {
   const score = scoreNumbers(history);
 
-  // Only numbers already present in the original 10 tickets.
+  // 收集原本10組的所有號碼
   const pool = [...new Set(tickets.flat())];
+
+  // 記錄每顆號碼出現在哪些原始組合
+  const sources = new Map();
+
+  tickets.forEach((ticket, groupIndex) => {
+    ticket.forEach(number => {
+      if (!sources.has(number)) {
+        sources.set(number, new Set());
+      }
+      sources.get(number).add(groupIndex);
+    });
+  });
+
+  // 判斷3顆號碼是否來自至少2組不同原始組合
+  function isCrossGroup(ticket) {
+    const [a, b, c] = ticket;
+
+    // 如果3顆本身就是某一原始組合，
+    // A版不直接採用這個組合
+    const isOriginal = tickets.some(original =>
+      [...original].sort((x, y) => x - y).join("-") ===
+      ticket.join("-")
+    );
+
+    if (isOriginal) return false;
+
+    // 檢查能否分配到至少2個不同來源組
+    const groups = [
+      sources.get(a),
+      sources.get(b),
+      sources.get(c)
+    ];
+
+    for (const x of groups[0]) {
+      for (const y of groups[1]) {
+        for (const z of groups[2]) {
+          if (new Set([x, y, z]).size >= 2) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 
   const candidates = [];
 
+  // 從30個號碼位置中的不同號碼，
+  // 枚舉所有可能的3碼組合
   for (let i = 0; i < pool.length; i++) {
     for (let j = i + 1; j < pool.length; j++) {
       for (let k = j + 1; k < pool.length; k++) {
         const ticket = [
           pool[i], pool[j], pool[k]
         ].sort((a, b) => a - b);
+
+        if (!isCrossGroup(ticket)) continue;
 
         const value = ticket.reduce(
           (sum, n) => sum + score[n], 0
@@ -123,16 +173,18 @@ function chooseSelections(tickets, history) {
 
   candidates.sort((a, b) =>
     b.value - a.value ||
-    a.ticket.join("-").localeCompare(b.ticket.join("-"))
+    a.ticket.join("-").localeCompare(
+      b.ticket.join("-")
+    )
   );
 
   const first = candidates[0]?.ticket;
 
   if (!first) {
-    throw new Error("無法建立精選號碼");
+    throw new Error("無法建立A版跨組精選號碼");
   }
 
-  // Second ticket prioritizes high scores while reducing overlap.
+  // 第二組：優先選高評分，並減少與第一組重複
   const second = candidates
     .filter(c =>
       c.ticket.join("-") !== first.join("-")
@@ -149,11 +201,13 @@ function chooseSelections(tickets, history) {
     })
     .sort((a, b) =>
       b.adjusted - a.adjusted ||
-      a.ticket.join("-").localeCompare(b.ticket.join("-"))
+      a.ticket.join("-").localeCompare(
+        b.ticket.join("-")
+      )
     )[0]?.ticket;
 
   if (!second) {
-    throw new Error("無法建立第二組精選號碼");
+    throw new Error("無法建立第二組跨組精選號碼");
   }
 
   return {
