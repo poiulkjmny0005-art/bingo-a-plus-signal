@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三星 V2.2 智慧追蹤</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:#e9f0ff;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif}
+header{padding:24px 18px;background:#14243c;border-bottom:1px solid #314563}
+h1{font-size:25px;margin:0 0 8px}
+p{color:#9fb2cd;line-height:1.6}
+main{max-width:800px;margin:auto;padding:16px}
+.card{background:#142138;border:1px solid #30415d;border-radius:18px;padding:18px;margin-bottom:16px}
+.title{font-size:19px;font-weight:800;margin-bottom:14px}
+.label{color:#9fb2cd;font-size:13px}
+.big{font-size:27px;font-weight:900;margin:8px 0}
+.row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.metric{flex:1;min-width:125px;background:#1b2b44;border-radius:12px;padding:14px}
+.ticket{display:flex;align-items:center;gap:8px;border-bottom:1px solid #30415d;padding:12px 0}
+.index{width:30px;color:#9fb2cd}
+.ball{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:#284363;border:1px solid #51749b;font-size:19px;font-weight:800}
+.status{margin-left:auto;color:#9fb2cd;font-size:13px}
+.good{color:#6ee7b7}
+.warn{color:#fcd34d}
+.error{color:#fca5a5}
+a{color:#93c5fd}
+small{color:#9fb2cd}
+button{background:#2563eb;color:white;border:0;border-radius:10px;padding:10px 14px;font-size:15px}
+</style>
+</head>
+<body>
+<header>
+<h1>⭐ 三星 V2.2 智慧選號追蹤</h1>
+<p>官方開獎資料・10組三星・獨立前瞻核獎</p>
+<button onclick="loadData()">重新整理資料</button>
+</header>
+<main>
+<section class="card">
+<div class="title">最新預測</div>
+<div class="row">
+<div class="metric"><div class="label">基準期號</div><div class="big" id="base">—</div></div>
+<div class="metric"><div class="label">預測目標期號</div><div class="big good" id="target">—</div></div>
+</div>
+<p id="update">正在讀取資料…</p>
+<p id="warning" class="warn"></p>
+</section>
+<section class="card">
+<div class="title">V2.2 最新10組三星號碼</div>
+<div id="tickets">載入中…</div>
+</section>
+<section class="card">
+<div class="title">V2.2 前瞻追蹤成績</div>
+<div class="row">
+<div class="metric"><div class="label">已核對期數</div><div class="big" id="settled">—</div></div>
+<div class="metric"><div class="label">至少1組全中</div><div class="big" id="wins">—</div></div>
+<div class="metric"><div class="label">實際追蹤命中率</div><div class="big" id="rate">—</div></div>
+</div>
+</section>
+<section class="card">
+<div class="title">V2.1 與 V2.2 比較</div>
+<p>V2.1 與 V2.2 必須使用相同的未來開獎期間，才能公平比較。</p>
+<div id="compare">正在讀取比較資料…</div>
+<p><a href="star3.html">查看 V2.1 原版網頁 →</a></p>
+</section>
+<section class="card">
+<div class="title">最近核獎紀錄</div>
+<div id="recent">尚無資料</div>
+</section>
+<p><small>注意：歷史熱門號不代表未來較容易開出。本系統只做前瞻追蹤研究，不保證中獎。GitHub Actions 每5分鐘嘗試更新，可能延遲。</small></p>
+</main>
+<script>
+const pad=n=>String(n).padStart(2,'0');
+const el=id=>document.getElementById(id);
+const fetchJson=async path=>{
+ const r=await fetch(path+'?t='+Date.now(),{cache:'no-store'});
+ if(!r.ok)throw Error('HTTP '+r.status);
+ return r.json();
+};
+function showTickets(batch){
+ const tickets=Array.isArray(batch?.tickets)?batch.tickets:[];
+ if(!tickets.length){el('tickets').textContent='尚未建立預測';return;}
+ el('tickets').innerHTML=tickets.map((ticket,i)=>
+  '<div class="ticket"><span class="index">'+pad(i+1)+'</span>'+
+  ticket.map(n=>'<span class="ball">'+pad(n)+'</span>').join('')+
+  '<span class="status">'+(batch.status==='settled'?'已核獎':'待開獎')+'</span></div>'
+ ).join('');
+}
+function showRecent(batches){
+ const settled=batches.filter(b=>b.status==='settled').slice(-8).reverse();
+ el('recent').innerHTML=settled.length?settled.map(b=>
+  '<div class="ticket"><span>'+b.basePeriod+' → '+b.targetPeriod+'</span>'+
+  '<span class="status '+(b.anyFullHit?'good':'')+'">全中 '+(b.fullHitTickets||0)+' 組</span></div>'
+ ).join(''):'尚無已核獎紀錄';
+}
+async function loadData(){
+ try{
+  const data=await fetchJson('star3_v22_tracking.json');
+  const batches=Array.isArray(data.batches)?data.batches:[];
+  const pending=batches.filter(b=>b.status==='pending');
+  const batch=pending.length?pending[pending.length-1]:batches[batches.length-1];
+  el('base').textContent=batch?.basePeriod||'—';
+  el('target').textContent=batch?.targetPeriod||data.nextTargetPeriod||'—';
+  el('update').textContent='最後執行：'+(data.lastRunAt?new Date(data.lastRunAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'}):'未知');
+  el('warning').textContent=batch?.status==='settled'?'目前顯示的是已核獎批次，等待下一期預測更新。':'';
+  showTickets(batch);
+  const s=data.summary||{};
+  el('settled').textContent=s.settledPeriods??0;
+  el('wins').textContent=s.winningPeriods??0;
+  el('rate').textContent=(s.hitRate??0)+'%';
+  showRecent(batches);
+ }catch(e){
+  el('update').textContent='V2.2 資料讀取失敗：'+e.message;
+  el('tickets').textContent='請確認追蹤檔已上傳並等待 GitHub Pages 更新。';
+ }
+ try{
+  const v21=await fetchJson('star3_v21_forward_tracking.json');
+  const keys=Object.keys(v21);
+  el('compare').textContent='V2.1 資料已讀取（欄位：'+keys.slice(0,6).join('、')+'）。兩版本的共同期間比較功能將在累積足夠資料後加入。';
+ }catch(e){
+  el('compare').textContent='暫時無法讀取 V2.1 資料：'+e.message;
+ }
+}
+loadData();
+setInterval(loadData,60000);
+</script>
+</body>
+</html>
