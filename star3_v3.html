@@ -4,15 +4,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>三星 V3 雲端自動追蹤</title>
+<title>三星 V3.1 雲端自動追蹤</title>
 <style>
 * { box-sizing: border-box; }
 body {
   margin: 0;
   background: #0b1220;
   color: #eef4ff;
-  font-family: -apple-system, BlinkMacSystemFont,
-    "Noto Sans TC", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif;
 }
 header {
   padding: 25px 18px;
@@ -39,7 +38,12 @@ main { max-width: 800px; margin: auto; padding: 16px; }
   border-radius: 12px;
 }
 .label { font-size: 13px; color: #a8b8d1; }
-.value { font-size: 25px; font-weight: bold; margin-top: 8px; }
+.value {
+  font-size: 25px;
+  font-weight: bold;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
 .green { color: #6ee7b7; }
 .yellow { color: #fcd34d; }
 .red { color: #fca5a5; }
@@ -60,7 +64,7 @@ main { max-width: 800px; margin: auto; padding: 16px; }
   padding: 13px 0;
   border-bottom: 1px solid #344663;
 }
-.index { width: 30px; color: #a8b8d1; }
+.index { width: 30px; color: #a8b8d1; flex-shrink: 0; }
 .ball {
   display: inline-flex;
   justify-content: center;
@@ -72,8 +76,14 @@ main { max-width: 800px; margin: auto; padding: 16px; }
   border: 1px solid #6486ad;
   font-size: 19px;
   font-weight: bold;
+  flex-shrink: 0;
 }
-.result { margin-left: auto; font-size: 13px; color: #a8b8d1; }
+.result {
+  margin-left: auto;
+  font-size: 13px;
+  color: #a8b8d1;
+  text-align: right;
+}
 button {
   background: #3166e7;
   border: none;
@@ -90,8 +100,8 @@ small { color: #a8b8d1; line-height: 1.6; }
 <body>
 
 <header>
-  <h1>⭐ 三星 V3 雲端追蹤</h1>
-  <p>10組三星｜前瞻核獎｜關閉網頁仍可雲端追蹤</p>
+  <h1>⭐ 三星 V3.1 雲端追蹤</h1>
+  <p>10組三星｜前瞻核獎｜漏期統計｜關閉網頁仍可雲端追蹤</p>
   <button onclick="loadData()">🔄 更新最新資料</button>
 </header>
 
@@ -105,7 +115,7 @@ small { color: #a8b8d1; line-height: 1.6; }
 </section>
 
 <section class="card">
-  <div class="title">V3 最新預測</div>
+  <div class="title">V3.1 最新預測</div>
   <div class="row">
     <div class="metric">
       <div class="label">基準期號</div>
@@ -125,7 +135,7 @@ small { color: #a8b8d1; line-height: 1.6; }
 </section>
 
 <section class="card">
-  <div class="title">V3 真實前瞻測試成績</div>
+  <div class="title">V3.1 真實前瞻測試成績</div>
   <div class="row">
     <div class="metric">
       <div class="label">累計預測期數</div>
@@ -136,18 +146,27 @@ small { color: #a8b8d1; line-height: 1.6; }
       <div class="value" id="settled">—</div>
     </div>
     <div class="metric">
-      <div class="label">至少一組全中</div>
-      <div class="value" id="wins">—</div>
+      <div class="label">待核獎期數</div>
+      <div class="value yellow" id="pending">—</div>
     </div>
     <div class="metric">
-      <div class="label">實際追蹤命中率</div>
+      <div class="label">累計漏期數</div>
+      <div class="value red" id="missed">—</div>
+    </div>
+    <div class="metric">
+      <div class="label">三星全中期數</div>
+      <div class="value green" id="wins">—</div>
+    </div>
+    <div class="metric">
+      <div class="label">前瞻命中率</div>
       <div class="value" id="rate">—</div>
     </div>
   </div>
+  <p id="missedNote"></p>
 </section>
 
 <section class="card">
-  <div class="title">最近核獎紀錄</div>
+  <div class="title">最近10期核獎紀錄</div>
   <div id="recent">尚無核獎資料</div>
 </section>
 
@@ -158,9 +177,8 @@ small { color: #a8b8d1; line-height: 1.6; }
 </section>
 
 <p><small>
-注意：V3 的雲端排程可能延遲。若無法確認官方最新期號，
-或資料過期，畫面不會宣稱預測是即時有效的。
-選號及追蹤結果不保證提高中獎機率。
+注意：GitHub Actions 排程可能延遲，網頁刷新不代表雲端已執行。
+漏期不計入命中率分母。選號及追蹤結果不保證提高中獎機率。
 </small></p>
 
 </main>
@@ -168,11 +186,12 @@ small { color: #a8b8d1; line-height: 1.6; }
 <script>
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, "0");
-
 let loading = false;
 
 function taiwanTime(date) {
-  return new Date(date).toLocaleString("zh-TW", {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "未知";
+  return d.toLocaleString("zh-TW", {
     timeZone: "Asia/Taipei",
     hour12: false
   });
@@ -192,13 +211,11 @@ function taiwanDate() {
 
 async function getJson(path) {
   const separator = path.includes("?") ? "&" : "?";
-  const url = path + separator + "t=" + Date.now();
-  const response = await fetch(url, { cache: "no-store" });
-
-  if (!response.ok) {
-    throw new Error("HTTP " + response.status);
-  }
-
+  const response = await fetch(
+    path + separator + "t=" + Date.now(),
+    { cache: "no-store" }
+  );
+  if (!response.ok) throw new Error("HTTP " + response.status);
   return response.json();
 }
 
@@ -235,10 +252,7 @@ async function getOfficialLatest() {
       .map(d => Number(d.drawTerm))
       .filter(n => Number.isSafeInteger(n) && n > 0);
 
-    if (!periods.length) {
-      throw new Error("無有效期號");
-    }
-
+    if (!periods.length) throw new Error("無有效期號");
     return Math.max(...periods);
   } finally {
     clearTimeout(timeout);
@@ -254,42 +268,82 @@ function showTickets(batch) {
     return;
   }
 
-  $("tickets").innerHTML = tickets.map((ticket, i) => {
+  const container = $("tickets");
+  container.replaceChildren();
+
+  tickets.forEach((ticket, i) => {
+    const line = document.createElement("div");
+    line.className = "ticket";
+
+    const index = document.createElement("span");
+    index.className = "index";
+    index.textContent = pad(i + 1);
+    line.appendChild(index);
+
+    ticket.forEach(n => {
+      const ball = document.createElement("span");
+      ball.className = "ball";
+      ball.textContent = pad(n);
+      line.appendChild(ball);
+    });
+
     const result = Array.isArray(batch.results)
       ? batch.results[i] : null;
 
-    const label = result
-      ? (result.fullHit ? "三星全中" : "中 " + result.hitCount + " 顆")
+    const label = document.createElement("span");
+    label.className = "result";
+    label.textContent = result
+      ? (result.fullHit
+          ? "三星全中"
+          : "中 " + result.hitCount + " 顆")
       : (batch.status === "pending" ? "待核獎" : "已核獎");
 
-    return '<div class="ticket">' +
-      '<span class="index">' + pad(i + 1) + '</span>' +
-      ticket.map(n =>
-        '<span class="ball">' + pad(n) + '</span>'
-      ).join("") +
-      '<span class="result">' + label + '</span>' +
-      '</div>';
-  }).join("");
+    line.appendChild(label);
+    container.appendChild(line);
+  });
 }
 
 function showRecent(batches) {
   const recent = batches
     .filter(b => b.status === "settled")
-    .slice(-10)
-    .reverse();
+    .sort((a, b) =>
+      Number(b.targetPeriod) - Number(a.targetPeriod)
+    )
+    .slice(0, 10);
+
+  const container = $("recent");
+  container.replaceChildren();
 
   if (!recent.length) {
-    $("recent").textContent = "尚無已核獎紀錄";
+    container.textContent = "尚無已核獎紀錄";
     return;
   }
 
-  $("recent").innerHTML = recent.map(b =>
-    '<div class="ticket">' +
-    '<span>第 ' + b.targetPeriod + ' 期</span>' +
-    '<span class="result">' +
-    '全中 ' + (b.fullHitTickets || 0) + ' 組' +
-    '</span></div>'
-  ).join("");
+  recent.forEach(b => {
+    const line = document.createElement("div");
+    line.className = "ticket";
+
+    const period = document.createElement("span");
+    period.textContent = "第 " + b.targetPeriod + " 期";
+
+    const result = document.createElement("span");
+    result.className = "result";
+    result.textContent =
+      "三星全中 " + (b.fullHitTickets || 0) + " 組";
+
+    line.append(period, result);
+    container.appendChild(line);
+  });
+}
+
+function firstNumber(...values) {
+  for (const value of values) {
+    if (typeof value === "number" &&
+        Number.isFinite(value) && value >= 0) {
+      return value;
+    }
+  }
+  return null;
 }
 
 async function loadData() {
@@ -326,11 +380,46 @@ async function loadData() {
     showTickets(batch);
 
     const summary = data.summary || {};
+    const settled = batches.filter(
+      b => b.status === "settled"
+    ).length;
+    const pending = batches.filter(
+      b => b.status === "pending"
+    ).length;
+    const wins = batches.filter(
+      b => b.status === "settled" && b.anyFullHit
+    ).length;
 
-    $("total").textContent = summary.totalPredictions ?? batches.length;
-    $("settled").textContent = summary.settledPeriods ?? 0;
-    $("wins").textContent = summary.winningPeriods ?? 0;
-    $("rate").textContent = (summary.hitRate ?? 0) + "%";
+    $("total").textContent =
+      summary.totalPredictions ?? batches.length;
+    $("settled").textContent =
+      summary.settledPeriods ?? settled;
+    $("pending").textContent =
+      summary.pendingPeriods ?? pending;
+    $("wins").textContent =
+      summary.winningPeriods ?? wins;
+
+    const denominator = summary.settledPeriods ?? settled;
+    const numerator = summary.winningPeriods ?? wins;
+    $("rate").textContent = denominator > 0
+      ? (numerator / denominator * 100).toFixed(2) + "%"
+      : "0%";
+
+    const missed = firstNumber(
+      summary.missedPeriods,
+      summary.totalMissedPeriods,
+      summary.missingPeriods,
+      summary.skippedPeriods,
+      data.missedPeriods,
+      data.totalMissedPeriods
+    );
+
+    $("missed").textContent =
+      missed === null ? "—" : missed;
+
+    $("missedNote").textContent = missed === null
+      ? "雲端資料尚未提供漏期統計，需確認 V3.1 追蹤程式輸出的欄位。"
+      : "漏期數由雲端追蹤程式提供，不列入命中率計算。";
 
     showRecent(batches);
 
@@ -344,7 +433,10 @@ async function loadData() {
     } else if (batch.status === "settled") {
       setStatus("最新一批已核獎，尚無新的待開獎預測。", "bad");
     } else if (ageMinutes > 10 || ageMinutes < -2) {
-      setStatus("⚠️ 雲端資料可能已過期，請勿當成下一期即時號碼。", "bad");
+      setStatus(
+        "⚠️ 雲端資料可能已過期，請勿當成下一期即時號碼。",
+        "bad"
+      );
     } else {
       setStatus("雲端資料已載入，正在驗證官方最新期號…");
     }
@@ -362,10 +454,12 @@ async function loadData() {
           "⛔ 這組預測的目標期號已開出或已過期，請勿使用。",
           "bad"
         );
-      } else if (Number(batch.targetPeriod) === official + 1 &&
-                 batch.status === "pending" &&
-                 ageMinutes <= 10 &&
-                 ageMinutes >= -2) {
+      } else if (
+        Number(batch.targetPeriod) === official + 1 &&
+        batch.status === "pending" &&
+        ageMinutes <= 10 &&
+        ageMinutes >= -2
+      ) {
         setStatus(
           "✅ 預測目標與剛取得的官方下一期號碼一致；仍需留意開獎時間。",
           "good"
@@ -387,20 +481,20 @@ async function loadData() {
     }
 
   } catch (error) {
-    setStatus("❌ 無法取得 V3 雲端資料：" + error.message, "bad");
+    setStatus(
+      "❌ 無法取得 V3.1 雲端資料：" + error.message,
+      "bad"
+    );
     $("tickets").textContent =
-      "請確認 V3 追蹤檔存在，並等待 GitHub Pages 更新。";
+      "請確認追蹤檔存在，並等待 GitHub Pages 更新。";
   } finally {
     loading = false;
   }
 }
 
 loadData();
-
-// 網頁開啟時，每30秒重新檢查一次。
 setInterval(loadData, 30000);
 
-// 手機切回網頁時，立即重新檢查。
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) loadData();
 });
