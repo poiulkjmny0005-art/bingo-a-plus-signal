@@ -98,47 +98,39 @@ function scoreNumbers(history) {
 }
 
 
+
 function chooseSelections(tickets, history) {
   const score = scoreNumbers(history);
 
-  // 收集原本10組的所有號碼
+  // 原本10組，共30個號碼位置
   const pool = [...new Set(tickets.flat())];
 
-  // 記錄每顆號碼出現在哪些原始組合
+  // 記錄原始10組，避免直接複製原組合
+  const originalGroups = new Set(
+    tickets.map(t =>
+      [...t].sort((a, b) => a - b).join("-")
+    )
+  );
+
+  // 記錄每顆號碼來自哪些組
   const sources = new Map();
 
   tickets.forEach((ticket, groupIndex) => {
-    ticket.forEach(number => {
-      if (!sources.has(number)) {
-        sources.set(number, new Set());
+    ticket.forEach(n => {
+      if (!sources.has(n)) {
+        sources.set(n, new Set());
       }
-      sources.get(number).add(groupIndex);
+      sources.get(n).add(groupIndex);
     });
   });
 
-  // 判斷3顆號碼是否來自至少2組不同原始組合
+  // 確認每組3顆可以來自至少2個不同原始組合
   function isCrossGroup(ticket) {
     const [a, b, c] = ticket;
 
-    // 如果3顆本身就是某一原始組合，
-    // A版不直接採用這個組合
-    const isOriginal = tickets.some(original =>
-      [...original].sort((x, y) => x - y).join("-") ===
-      ticket.join("-")
-    );
-
-    if (isOriginal) return false;
-
-    // 檢查能否分配到至少2個不同來源組
-    const groups = [
-      sources.get(a),
-      sources.get(b),
-      sources.get(c)
-    ];
-
-    for (const x of groups[0]) {
-      for (const y of groups[1]) {
-        for (const z of groups[2]) {
+    for (const x of sources.get(a)) {
+      for (const y of sources.get(b)) {
+        for (const z of sources.get(c)) {
           if (new Set([x, y, z]).size >= 2) {
             return true;
           }
@@ -151,26 +143,39 @@ function chooseSelections(tickets, history) {
 
   const candidates = [];
 
-  // 從30個號碼位置中的不同號碼，
-  // 枚舉所有可能的3碼組合
+  // 將全部號碼重新組合成3星候選
   for (let i = 0; i < pool.length; i++) {
     for (let j = i + 1; j < pool.length; j++) {
       for (let k = j + 1; k < pool.length; k++) {
         const ticket = [
-          pool[i], pool[j], pool[k]
+          pool[i],
+          pool[j],
+          pool[k]
         ].sort((a, b) => a - b);
 
+        const key = ticket.join("-");
+
+        // 不採用原本10組的完整組合
+        if (originalGroups.has(key)) continue;
+
+        // 每組必須跨組搭配
         if (!isCrossGroup(ticket)) continue;
 
+        // 依近期歷史熱度評分
         const value = ticket.reduce(
-          (sum, n) => sum + score[n], 0
+          (sum, n) => sum + score[n],
+          0
         );
 
-        candidates.push({ ticket, value });
+        candidates.push({
+          ticket,
+          value
+        });
       }
     }
   }
 
+  // 分數高的優先
   candidates.sort((a, b) =>
     b.value - a.value ||
     a.ticket.join("-").localeCompare(
@@ -178,43 +183,38 @@ function chooseSelections(tickets, history) {
     )
   );
 
+  // 第一組：取評分最高的跨組三星
   const first = candidates[0]?.ticket;
 
   if (!first) {
-    throw new Error("無法建立A版跨組精選號碼");
+    throw new Error("無法建立第一組跨組精選");
   }
 
-  // 第二組：優先選高評分，並減少與第一組重複
-  const second = candidates
-    .filter(c =>
-      c.ticket.join("-") !== first.join("-")
-    )
-    .map(c => {
-      const overlap = c.ticket.filter(
-        n => first.includes(n)
-      ).length;
-
-      return {
-        ...c,
-        adjusted: c.value - overlap * 0.12
-      };
-    })
-    .sort((a, b) =>
-      b.adjusted - a.adjusted ||
-      a.ticket.join("-").localeCompare(
-        b.ticket.join("-")
-      )
-    )[0]?.ticket;
+  // 第二組：另外選3顆，不能與第一組重複
+  const second = candidates.find(c =>
+    c.ticket.every(n => !first.includes(n))
+  )?.ticket;
 
   if (!second) {
-    throw new Error("無法建立第二組跨組精選號碼");
+    throw new Error("無法建立第二組不重複精選");
+  }
+
+  // 最後再次確認兩組共6顆不同號碼
+  const allSix = [...first, ...second];
+
+  if (new Set(allSix).size !== 6) {
+    throw new Error("精選6顆號碼發生重複");
   }
 
   return {
+    // 單組方案：只測試第一組
     selectedOne: [first],
+
+    // 雙組方案：第一組 + 第二組，共6顆不重複
     selectedTwo: [first, second]
   };
 }
+
 
 function loadData() {
   if (!fs.existsSync(OUTPUT_FILE)) {
