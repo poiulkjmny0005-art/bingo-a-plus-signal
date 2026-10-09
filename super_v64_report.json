@@ -1,76 +1,44 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-09T13:01:28.870Z",
-  "latestPeriod": "115057210",
+  "generatedAt": "2026-10-09T13:20:52.656Z",
+  "latestPeriod": "115057214",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 15,
+  "completedRounds": 16,
   "active": {
-    "anchorPeriod": "115057200",
+    "anchorPeriod": "115057212",
     "picks": {
       "HOT100": 16,
-      "GAP_SHORT": 59
+      "GAP_SHORT": 1
     },
     "draws": [
       {
-        "period": "115057201",
-        "number": 71
+        "period": "115057213",
+        "number": 55
       },
       {
-        "period": "115057202",
-        "number": 65
-      },
-      {
-        "period": "115057203",
-        "number": 73
-      },
-      {
-        "period": "115057204",
-        "number": 36
-      },
-      {
-        "period": "115057205",
-        "number": 20
-      },
-      {
-        "period": "115057206",
-        "number": 78
-      },
-      {
-        "period": "115057207",
-        "number": 29
-      },
-      {
-        "period": "115057208",
-        "number": 1
-      },
-      {
-        "period": "115057209",
-        "number": 16
-      },
-      {
-        "period": "115057210",
-        "number": 29
+        "period": "115057214",
+        "number": 74
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 15,
-      "hits": 1,
-      "rate": 0.06666666666666667,
+      "rounds": 16,
+      "hits": 2,
+      "rate": 0.125,
       "wilson95": {
-        "lower": 0.011866588606194856,
-        "upper": 0.2981707755242399
+        "lower": 0.034976749337057134,
+        "upper": 0.3602333143674828
       }
     },
     "GAP_SHORT": {
-      "rounds": 15,
+      "rounds": 16,
       "hits": 1,
-      "rate": 0.06666666666666667,
+      "rate": 0.0625,
       "wilson95": {
-        "lower": 0.011866588606194856,
-        "upper": 0.2981707755242399
+        "lower": 0.01111905730833121,
+        "upper": 0.2832926836802987
       }
     }
   }
