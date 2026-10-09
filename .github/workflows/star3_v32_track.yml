@@ -1,4 +1,5 @@
-name: Track Bingo 3-Star V3.2
+
+name: Track Bingo 3-Star V3.2 A+B
 
 on:
   workflow_dispatch:
@@ -34,16 +35,24 @@ jobs:
       - name: Update V3.1 predictions and settlement
         run: node star3_v3_track.js history.csv
 
-      - name: Run V3.2 combined selections
+      - name: Run V3.2 A selections
         run: node star3_v32_track.js history.csv
+
+      - name: Run V3.2 B three-group selections
+        run: node star3_v32b_track.js history.csv
 
       - name: Save tracking results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add history.csv star3_v3_tracking.json star3_v3_report.csv star3_v32_tracking.json star3_v32_report.csv
+
+          git add history.csv
+          git add star3_v3_tracking.json star3_v3_report.csv
+          git add star3_v32_tracking.json star3_v32_report.csv
+          git add star3_v32b_tracking.json star3_v32b_report.csv
+
           if ! git diff --cached --quiet; then
-            git commit -m "Update Bingo V3.1 and V3.2 tracking"
+            git commit -m "Update Bingo V3.1 V3.2A V3.2B tracking"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
