@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 'use strict';
 // v2.1: forward-only comparison of the TWO fixed v2 algorithms.
@@ -23,8 +24,6 @@ function parse(txt){
  for(let i=1;i<rows.length;i++)if(BigInt(rows[i].period)<=BigInt(rows[i-1].period))throw Error('期號排序或重複錯誤');
  return rows;
 }
-// The following feature extraction and ticket generator are copied from
-// star3_v2_research.js. The two methods remain frozen for forward comparison.
 const featureNames=['近50期熱度','50期熱度加速','50期直線連莊','50期斜線相鄰','50期密集區域','10對20期熱度變化','50期間隔2至5期'];
 const factorWeights=[[3,2,1,1,1,1,1],[2,3,1,1,1,2,1],[2,1,3,1,1,1,2],[2,1,1,3,1,1,1],[2,1,1,1,3,1,1],[1,2,2,1,2,1,1],[2,2,1,2,1,1,1],[2,1,2,1,2,1,1],[1,2,1,2,2,2,1],[2,2,2,2,2,1,1]];
 const fixedWeight=[1,1,1,1,1,1,1];
@@ -67,12 +66,14 @@ function makeTickets(features,method,seed){
 function csv(file,rows){fs.writeFileSync(file,rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n')+'\n');}
 const draws=parse(fs.readFileSync(historyFile,'utf8'));
 const newest=draws.at(-1).period;
+const targetPeriod=(BigInt(newest)+1n).toString();
 let state={version:1,strategies:methods,predictions:[]};
 if(fs.existsSync(stateFile)){
  state=JSON.parse(fs.readFileSync(stateFile,'utf8'));
  if(state.version!==1||!Array.isArray(state.predictions)||JSON.stringify(state.strategies)!==JSON.stringify(methods))throw Error('追蹤狀態版本或策略不相容');
 }
 for(const batch of state.predictions){
+ if(!batch.targetPeriod)batch.targetPeriod=(BigInt(batch.base)+1n).toString();
  if(batch.status!=='pending')continue;
  const at=draws.findIndex(d=>d.period===batch.base);
  if(at<0){
@@ -97,12 +98,16 @@ if(!state.predictions.some(b=>b.base===newest)){
  for(const method of methods){
   if(tickets[method].length!==10||new Set(tickets[method].map(t=>t.join(','))).size!==10)throw Error(method+' 沒有10組不同的組合');
  }
- state.predictions.push({base:newest,status:'pending',tickets,hits:{}});
- console.log('建立新的下一期研究預測，基準期號 '+newest+'；兩策略各10組');
+ state.predictions.push({base:newest,targetPeriod,status:'pending',tickets,hits:{}});
+ console.log('建立下一期預測：基準 '+newest+' → 目標 '+targetPeriod+'；兩策略各10組');
  for(const method of methods){
   console.log('【'+method+'】');tickets[method].forEach((t,i)=>console.log(String(i+1).padStart(2,'0')+'. '+t.map(n=>String(n).padStart(2,'0')).join(' ')));
  }
-}else console.log('基準期號 '+newest+' 已建立預測，不重複建立');
+}else console.log('基準期號 '+newest+' 已建立預測，目標 '+targetPeriod+'，不重複建立');
+state.latestHistoryPeriod=newest;
+state.nextTargetPeriod=targetPeriod;
+state.lastRunAt=new Date().toISOString();
+console.log('本次讀取 history.csv 最新期號 '+newest+'；下一期 '+targetPeriod+'。若開獎網站資料延遲，本程式無法補足未取得的開獎結果。');
 const settled=state.predictions.filter(b=>b.status==='settled');
 const pending=state.predictions.filter(b=>b.status==='pending');
 const unverified=state.predictions.filter(b=>b.status==='unverified');
