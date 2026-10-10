@@ -1,72 +1,35 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-10T03:00:11.689Z",
-  "latestPeriod": "115057293",
+  "generatedAt": "2026-10-10T03:14:04.430Z",
+  "latestPeriod": "115057296",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 22,
+  "completedRounds": 23,
   "active": {
-    "anchorPeriod": "115057284",
+    "anchorPeriod": "115057296",
     "picks": {
-      "HOT100": 29,
-      "GAP_SHORT": 53
+      "HOT100": 71,
+      "GAP_SHORT": 37
     },
-    "draws": [
-      {
-        "period": "115057285",
-        "number": 46
-      },
-      {
-        "period": "115057286",
-        "number": 20
-      },
-      {
-        "period": "115057287",
-        "number": 37
-      },
-      {
-        "period": "115057288",
-        "number": 79
-      },
-      {
-        "period": "115057289",
-        "number": 42
-      },
-      {
-        "period": "115057290",
-        "number": 71
-      },
-      {
-        "period": "115057291",
-        "number": 47
-      },
-      {
-        "period": "115057292",
-        "number": 37
-      },
-      {
-        "period": "115057293",
-        "number": 69
-      }
-    ]
+    "draws": []
   },
   "results": {
     "HOT100": {
-      "rounds": 22,
+      "rounds": 23,
       "hits": 2,
-      "rate": 0.09090909090909091,
+      "rate": 0.08695652173913043,
       "wilson95": {
-        "lower": 0.025294896282837792,
-        "upper": 0.2781538065838578
+        "lower": 0.02417949540723341,
+        "upper": 0.2679640429809402
       }
     },
     "GAP_SHORT": {
-      "rounds": 22,
+      "rounds": 23,
       "hits": 3,
-      "rate": 0.13636363636363635,
+      "rate": 0.13043478260869565,
       "wilson95": {
-        "lower": 0.04748917264236269,
-        "upper": 0.3333541187947
+        "lower": 0.04537576514344702,
+        "upper": 0.32127897973018194
       }
     }
   }
