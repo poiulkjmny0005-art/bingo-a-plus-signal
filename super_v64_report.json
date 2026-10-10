@@ -1,72 +1,35 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-10T11:58:22.995Z",
-  "latestPeriod": "115057401",
+  "generatedAt": "2026-10-10T12:11:38.347Z",
+  "latestPeriod": "115057404",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 31,
+  "completedRounds": 32,
   "active": {
-    "anchorPeriod": "115057392",
+    "anchorPeriod": "115057404",
     "picks": {
-      "HOT100": 49,
-      "GAP_SHORT": 26
+      "HOT100": 2,
+      "GAP_SHORT": 34
     },
-    "draws": [
-      {
-        "period": "115057393",
-        "number": 77
-      },
-      {
-        "period": "115057394",
-        "number": 69
-      },
-      {
-        "period": "115057395",
-        "number": 70
-      },
-      {
-        "period": "115057396",
-        "number": 76
-      },
-      {
-        "period": "115057397",
-        "number": 40
-      },
-      {
-        "period": "115057398",
-        "number": 33
-      },
-      {
-        "period": "115057399",
-        "number": 20
-      },
-      {
-        "period": "115057400",
-        "number": 34
-      },
-      {
-        "period": "115057401",
-        "number": 48
-      }
-    ]
+    "draws": []
   },
   "results": {
     "HOT100": {
-      "rounds": 31,
+      "rounds": 32,
       "hits": 4,
-      "rate": 0.12903225806451613,
+      "rate": 0.125,
       "wilson95": {
-        "lower": 0.05134201164644764,
-        "upper": 0.28852756954385356
+        "lower": 0.04970053844474301,
+        "upper": 0.2806864978482796
       }
     },
     "GAP_SHORT": {
-      "rounds": 31,
+      "rounds": 32,
       "hits": 4,
-      "rate": 0.12903225806451613,
+      "rate": 0.125,
       "wilson95": {
-        "lower": 0.05134201164644764,
-        "upper": 0.28852756954385356
+        "lower": 0.04970053844474301,
+        "upper": 0.2806864978482796
       }
     }
   }
