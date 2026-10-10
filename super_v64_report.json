@@ -1,72 +1,35 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-10T03:59:00.832Z",
-  "latestPeriod": "115057305",
+  "generatedAt": "2026-10-10T04:11:41.547Z",
+  "latestPeriod": "115057308",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 23,
+  "completedRounds": 24,
   "active": {
-    "anchorPeriod": "115057296",
+    "anchorPeriod": "115057308",
     "picks": {
-      "HOT100": 71,
-      "GAP_SHORT": 37
+      "HOT100": 59,
+      "GAP_SHORT": 23
     },
-    "draws": [
-      {
-        "period": "115057297",
-        "number": 16
-      },
-      {
-        "period": "115057298",
-        "number": 66
-      },
-      {
-        "period": "115057299",
-        "number": 53
-      },
-      {
-        "period": "115057300",
-        "number": 38
-      },
-      {
-        "period": "115057301",
-        "number": 1
-      },
-      {
-        "period": "115057302",
-        "number": 75
-      },
-      {
-        "period": "115057303",
-        "number": 59
-      },
-      {
-        "period": "115057304",
-        "number": 23
-      },
-      {
-        "period": "115057305",
-        "number": 71
-      }
-    ]
+    "draws": []
   },
   "results": {
     "HOT100": {
-      "rounds": 23,
-      "hits": 2,
-      "rate": 0.08695652173913043,
+      "rounds": 24,
+      "hits": 3,
+      "rate": 0.125,
       "wilson95": {
-        "lower": 0.02417949540723341,
-        "upper": 0.2679640429809402
+        "lower": 0.04344255039315584,
+        "upper": 0.3100428814785757
       }
     },
     "GAP_SHORT": {
-      "rounds": 23,
+      "rounds": 24,
       "hits": 3,
-      "rate": 0.13043478260869565,
+      "rate": 0.125,
       "wilson95": {
-        "lower": 0.04537576514344702,
-        "upper": 0.32127897973018194
+        "lower": 0.04344255039315584,
+        "upper": 0.3100428814785757
       }
     }
   }
