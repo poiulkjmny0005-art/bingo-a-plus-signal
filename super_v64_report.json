@@ -1,72 +1,35 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-11T02:01:50.525Z",
-  "latestPeriod": "115057485",
+  "generatedAt": "2026-10-11T02:16:49.883Z",
+  "latestPeriod": "115057488",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 38,
+  "completedRounds": 39,
   "active": {
-    "anchorPeriod": "115057476",
+    "anchorPeriod": "115057488",
     "picks": {
       "HOT100": 2,
-      "GAP_SHORT": 13
+      "GAP_SHORT": 52
     },
-    "draws": [
-      {
-        "period": "115057477",
-        "number": 68
-      },
-      {
-        "period": "115057478",
-        "number": 29
-      },
-      {
-        "period": "115057479",
-        "number": 22
-      },
-      {
-        "period": "115057480",
-        "number": 58
-      },
-      {
-        "period": "115057481",
-        "number": 25
-      },
-      {
-        "period": "115057482",
-        "number": 75
-      },
-      {
-        "period": "115057483",
-        "number": 63
-      },
-      {
-        "period": "115057484",
-        "number": 52
-      },
-      {
-        "period": "115057485",
-        "number": 72
-      }
-    ]
+    "draws": []
   },
   "results": {
     "HOT100": {
-      "rounds": 38,
+      "rounds": 39,
       "hits": 7,
-      "rate": 0.18421052631578946,
+      "rate": 0.1794871794871795,
       "wilson95": {
-        "lower": 0.09221648453257492,
-        "upper": 0.33419168341511346
+        "lower": 0.08977151811469994,
+        "upper": 0.3266835162444276
       }
     },
     "GAP_SHORT": {
-      "rounds": 38,
+      "rounds": 39,
       "hits": 4,
-      "rate": 0.10526315789473684,
+      "rate": 0.10256410256410256,
       "wilson95": {
-        "lower": 0.041701897932665793,
-        "upper": 0.24130831200194466
+        "lower": 0.04061265558286986,
+        "upper": 0.2357915870224483
       }
     }
   }
