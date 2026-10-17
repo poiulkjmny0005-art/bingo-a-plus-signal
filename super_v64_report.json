@@ -1,72 +1,44 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-17T13:34:40.136Z",
-  "latestPeriod": "115058841",
+  "generatedAt": "2026-10-17T13:58:16.906Z",
+  "latestPeriod": "115058846",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 151,
+  "completedRounds": 152,
   "active": {
-    "anchorPeriod": "115058832",
+    "anchorPeriod": "115058844",
     "picks": {
       "HOT100": 24,
-      "GAP_SHORT": 20
+      "GAP_SHORT": 56
     },
     "draws": [
       {
-        "period": "115058833",
-        "number": 31
+        "period": "115058845",
+        "number": 68
       },
       {
-        "period": "115058834",
-        "number": 71
-      },
-      {
-        "period": "115058835",
+        "period": "115058846",
         "number": 78
-      },
-      {
-        "period": "115058836",
-        "number": 29
-      },
-      {
-        "period": "115058837",
-        "number": 3
-      },
-      {
-        "period": "115058838",
-        "number": 16
-      },
-      {
-        "period": "115058839",
-        "number": 8
-      },
-      {
-        "period": "115058840",
-        "number": 56
-      },
-      {
-        "period": "115058841",
-        "number": 49
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 151,
+      "rounds": 152,
       "hits": 22,
-      "rate": 0.1456953642384106,
+      "rate": 0.14473684210526316,
       "wilson95": {
-        "lower": 0.09822453699588263,
-        "upper": 0.21074669554111003
+        "lower": 0.09756442537915103,
+        "upper": 0.20942420923445668
       }
     },
     "GAP_SHORT": {
-      "rounds": 151,
+      "rounds": 152,
       "hits": 25,
-      "rate": 0.16556291390728478,
+      "rate": 0.16447368421052633,
       "wilson95": {
-        "lower": 0.1147301018082327,
-        "upper": 0.2329904074089286
+        "lower": 0.11395725895038368,
+        "upper": 0.23153200707357918
       }
     }
   }
