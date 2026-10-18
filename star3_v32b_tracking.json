@@ -53549,7 +53549,7 @@
     {
       "basePeriod": "115059073",
       "targetPeriod": "115059074",
-      "status": "pending",
+      "status": "settled",
       "createdAt": "2026-10-18T16:17:08.410Z",
       "sourceVersion": "V3.1",
       "originalTickets": [
@@ -53638,21 +53638,174 @@
         1.448287
       ],
       "totalScore": 4.772041,
+      "evaluatedCandidates": 196830,
+      "threeResults": [
+        {
+          "ticket": [
+            45,
+            46,
+            68
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            26,
+            55,
+            61
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            17,
+            23,
+            34
+          ],
+          "hits": [
+            23
+          ],
+          "hitCount": 1,
+          "fullHit": false
+        }
+      ],
+      "actualNumbers": [
+        2,
+        8,
+        9,
+        18,
+        23,
+        28,
+        30,
+        31,
+        32,
+        33,
+        41,
+        43,
+        49,
+        54,
+        58,
+        71,
+        73,
+        75,
+        79,
+        80
+      ],
+      "threeWin": false,
+      "fullHitGroups": 0,
+      "settledAt": "2026-10-18T23:27:49.970Z"
+    },
+    {
+      "basePeriod": "115059078",
+      "targetPeriod": "115059079",
+      "status": "pending",
+      "createdAt": "2026-10-18T23:27:50.634Z",
+      "sourceVersion": "V3.1",
+      "originalTickets": [
+        [
+          46,
+          51,
+          62
+        ],
+        [
+          8,
+          30,
+          68
+        ],
+        [
+          18,
+          50,
+          78
+        ],
+        [
+          26,
+          32,
+          52
+        ],
+        [
+          23,
+          49,
+          55
+        ],
+        [
+          27,
+          45,
+          76
+        ],
+        [
+          10,
+          11,
+          16
+        ],
+        [
+          3,
+          4,
+          80
+        ],
+        [
+          12,
+          70,
+          71
+        ],
+        [
+          6,
+          13,
+          20
+        ]
+      ],
+      "selectedThree": [
+        [
+          30,
+          51,
+          78
+        ],
+        [
+          49,
+          52,
+          76
+        ],
+        [
+          16,
+          20,
+          70
+        ]
+      ],
+      "sourceGroups": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10
+      ],
+      "groupScores": [
+        1.708211,
+        1.588684,
+        1.479164
+      ],
+      "totalScore": 4.776058,
       "evaluatedCandidates": 196830
     }
   ],
   "missedPeriods": 0,
-  "latestHistoryPeriod": "115059073",
-  "nextTargetPeriod": "115059074",
-  "lastRunAt": "2026-10-18T23:01:07.865Z",
+  "latestHistoryPeriod": "115059078",
+  "nextTargetPeriod": "115059079",
+  "lastRunAt": "2026-10-18T23:27:50.634Z",
   "summary": {
-    "totalPredictions": 346,
-    "settledPeriods": 345,
+    "totalPredictions": 347,
+    "settledPeriods": 346,
     "pendingPeriods": 1,
     "selectedThreeWinningPeriods": 19,
     "selectedThreeFullHitGroups": 19,
-    "selectedThreeHitRate": 5.51,
-    "totalTicketsSettled": 1035,
-    "perTicketFullHitRate": 1.84
+    "selectedThreeHitRate": 5.49,
+    "totalTicketsSettled": 1038,
+    "perTicketFullHitRate": 1.83
   }
 }
