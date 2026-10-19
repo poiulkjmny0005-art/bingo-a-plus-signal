@@ -1,64 +1,48 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-10-19T03:36:25.667Z",
-  "latestPeriod": "115059127",
+  "generatedAt": "2026-10-19T04:10:58.468Z",
+  "latestPeriod": "115059135",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 175,
+  "completedRounds": 176,
   "active": {
-    "anchorPeriod": "115059120",
+    "anchorPeriod": "115059132",
     "picks": {
-      "HOT100": 9,
-      "GAP_SHORT": 45
+      "HOT100": 45,
+      "GAP_SHORT": 50
     },
     "draws": [
       {
-        "period": "115059121",
-        "number": 78
+        "period": "115059133",
+        "number": 58
       },
       {
-        "period": "115059122",
-        "number": 57
+        "period": "115059134",
+        "number": 50
       },
       {
-        "period": "115059123",
-        "number": 1
-      },
-      {
-        "period": "115059124",
-        "number": 59
-      },
-      {
-        "period": "115059125",
-        "number": 47
-      },
-      {
-        "period": "115059126",
-        "number": 60
-      },
-      {
-        "period": "115059127",
-        "number": 44
+        "period": "115059135",
+        "number": 63
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 175,
+      "rounds": 176,
       "hits": 26,
-      "rate": 0.14857142857142858,
+      "rate": 0.14772727272727273,
       "wilson95": {
-        "lower": 0.10344941553276561,
-        "upper": 0.2087911370008731
+        "lower": 0.10284931061739361,
+        "upper": 0.20765504432606774
       }
     },
     "GAP_SHORT": {
-      "rounds": 175,
-      "hits": 28,
-      "rate": 0.16,
+      "rounds": 176,
+      "hits": 29,
+      "rate": 0.16477272727272727,
       "wilson95": {
-        "lower": 0.11307870395124363,
-        "upper": 0.22152800947561013
+        "lower": 0.11724314320578588,
+        "upper": 0.22662390424041118
       }
     }
   }
