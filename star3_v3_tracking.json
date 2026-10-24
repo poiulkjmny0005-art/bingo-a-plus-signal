@@ -195627,7 +195627,7 @@
     {
       "basePeriod": "115060150",
       "targetPeriod": "115060151",
-      "status": "pending",
+      "status": "settled",
       "createdAt": "2026-10-24T04:16:20.943Z",
       "strategy": "V3_HOT_DIVERSIFIED",
       "tickets": [
@@ -195681,20 +195681,217 @@
           63,
           77
         ]
+      ],
+      "results": [
+        {
+          "ticket": [
+            42,
+            67,
+            72
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            7,
+            34,
+            58
+          ],
+          "hits": [
+            34,
+            58
+          ],
+          "hitCount": 2,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            14,
+            22,
+            57
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            20,
+            36,
+            68
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            28,
+            65,
+            66
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            17,
+            19,
+            47
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            6,
+            54,
+            79
+          ],
+          "hits": [
+            6,
+            54
+          ],
+          "hitCount": 2,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            2,
+            37,
+            75
+          ],
+          "hits": [
+            2,
+            37
+          ],
+          "hitCount": 2,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            15,
+            25,
+            41
+          ],
+          "hits": [
+            41
+          ],
+          "hitCount": 1,
+          "fullHit": false
+        },
+        {
+          "ticket": [
+            35,
+            63,
+            77
+          ],
+          "hits": [],
+          "hitCount": 0,
+          "fullHit": false
+        }
+      ],
+      "fullHitTickets": 0,
+      "anyFullHit": false,
+      "actualNumbers": [
+        2,
+        3,
+        6,
+        16,
+        21,
+        24,
+        26,
+        27,
+        29,
+        33,
+        34,
+        37,
+        39,
+        41,
+        46,
+        54,
+        58,
+        59,
+        73,
+        78
+      ],
+      "settledAt": "2026-10-24T04:25:30.125Z"
+    },
+    {
+      "basePeriod": "115060152",
+      "targetPeriod": "115060153",
+      "status": "pending",
+      "createdAt": "2026-10-24T04:25:30.127Z",
+      "strategy": "V3_HOT_DIVERSIFIED",
+      "tickets": [
+        [
+          42,
+          58,
+          72
+        ],
+        [
+          2,
+          34,
+          67
+        ],
+        [
+          7,
+          29,
+          54
+        ],
+        [
+          14,
+          36,
+          57
+        ],
+        [
+          6,
+          23,
+          63
+        ],
+        [
+          22,
+          68,
+          75
+        ],
+        [
+          41,
+          65,
+          66
+        ],
+        [
+          19,
+          38,
+          50
+        ],
+        [
+          5,
+          25,
+          47
+        ],
+        [
+          17,
+          20,
+          59
+        ]
       ]
     }
   ],
-  "latestHistoryPeriod": "115060150",
-  "nextTargetPeriod": "115060151",
-  "lastRunAt": "2026-10-24T04:16:21.062Z",
+  "latestHistoryPeriod": "115060152",
+  "nextTargetPeriod": "115060153",
+  "lastRunAt": "2026-10-24T04:25:30.246Z",
   "summary": {
-    "totalPredictions": 982,
+    "totalPredictions": 983,
     "pendingPeriods": 1,
-    "settledPeriods": 981,
+    "settledPeriods": 982,
     "winningPeriods": 125,
     "fullHitTickets": 132,
-    "missedPeriods": 1985,
-    "hitRate": 12.74
+    "missedPeriods": 1986,
+    "hitRate": 12.73
   },
   "missedPeriods": [
     "115057186",
@@ -197681,6 +197878,7 @@
     "115060145",
     "115060147",
     "115060149",
-    "115060150"
+    "115060150",
+    "115060152"
   ]
 }
