@@ -1,64 +1,52 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-11-01T07:40:57.501Z",
-  "latestPeriod": "115061815",
+  "generatedAt": "2026-11-01T08:24:53.080Z",
+  "latestPeriod": "115061824",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 399,
+  "completedRounds": 400,
   "active": {
-    "anchorPeriod": "115061808",
+    "anchorPeriod": "115061820",
     "picks": {
       "HOT100": 22,
-      "GAP_SHORT": 20
+      "GAP_SHORT": 34
     },
     "draws": [
       {
-        "period": "115061809",
-        "number": 43
+        "period": "115061821",
+        "number": 13
       },
       {
-        "period": "115061810",
-        "number": 11
+        "period": "115061822",
+        "number": 23
       },
       {
-        "period": "115061811",
-        "number": 2
-      },
-      {
-        "period": "115061812",
+        "period": "115061823",
         "number": 3
       },
       {
-        "period": "115061813",
-        "number": 45
-      },
-      {
-        "period": "115061814",
-        "number": 37
-      },
-      {
-        "period": "115061815",
-        "number": 25
+        "period": "115061824",
+        "number": 75
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 399,
+      "rounds": 400,
       "hits": 63,
-      "rate": 0.15789473684210525,
+      "rate": 0.1575,
       "wilson95": {
-        "lower": 0.12539931951283648,
-        "upper": 0.1969149598465941
+        "lower": 0.1250805930171134,
+        "upper": 0.19643556579366786
       }
     },
     "GAP_SHORT": {
-      "rounds": 399,
+      "rounds": 400,
       "hits": 57,
-      "rate": 0.14285714285714285,
+      "rate": 0.1425,
       "wilson95": {
-        "lower": 0.11192195014122791,
-        "upper": 0.1806039458933425
+        "lower": 0.11163780858819913,
+        "upper": 0.18016372944057255
       }
     }
   }
