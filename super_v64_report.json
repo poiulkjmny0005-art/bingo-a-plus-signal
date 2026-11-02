@@ -1,64 +1,52 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-11-02T10:42:36.250Z",
-  "latestPeriod": "115062055",
+  "generatedAt": "2026-11-02T11:30:30.053Z",
+  "latestPeriod": "115062064",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 419,
+  "completedRounds": 420,
   "active": {
-    "anchorPeriod": "115062048",
+    "anchorPeriod": "115062060",
     "picks": {
       "HOT100": 27,
-      "GAP_SHORT": 15
+      "GAP_SHORT": 63
     },
     "draws": [
       {
-        "period": "115062049",
+        "period": "115062061",
+        "number": 16
+      },
+      {
+        "period": "115062062",
         "number": 61
       },
       {
-        "period": "115062050",
-        "number": 51
+        "period": "115062063",
+        "number": 3
       },
       {
-        "period": "115062051",
-        "number": 32
-      },
-      {
-        "period": "115062052",
-        "number": 35
-      },
-      {
-        "period": "115062053",
-        "number": 64
-      },
-      {
-        "period": "115062054",
-        "number": 49
-      },
-      {
-        "period": "115062055",
-        "number": 43
+        "period": "115062064",
+        "number": 70
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 419,
+      "rounds": 420,
       "hits": 64,
-      "rate": 0.15274463007159905,
+      "rate": 0.1523809523809524,
       "wilson95": {
-        "lower": 0.12146548214700756,
-        "upper": 0.19033354614159984
+        "lower": 0.12117165613419317,
+        "upper": 0.18989172225999945
       }
     },
     "GAP_SHORT": {
-      "rounds": 419,
+      "rounds": 420,
       "hits": 62,
-      "rate": 0.14797136038186157,
+      "rate": 0.14761904761904762,
       "wilson95": {
-        "lower": 0.11717471613134749,
-        "upper": 0.1851645049859692
+        "lower": 0.11689137144943332,
+        "upper": 0.1847345189775564
       }
     }
   }
