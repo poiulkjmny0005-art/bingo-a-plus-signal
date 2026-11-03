@@ -1,64 +1,48 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-11-03T14:51:45.270Z",
-  "latestPeriod": "115062307",
+  "generatedAt": "2026-11-03T15:29:42.482Z",
+  "latestPeriod": "115062315",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 440,
+  "completedRounds": 441,
   "active": {
-    "anchorPeriod": "115062300",
+    "anchorPeriod": "115062312",
     "picks": {
       "HOT100": 20,
-      "GAP_SHORT": 15
+      "GAP_SHORT": 51
     },
     "draws": [
       {
-        "period": "115062301",
-        "number": 8
+        "period": "115062313",
+        "number": 36
       },
       {
-        "period": "115062302",
-        "number": 9
+        "period": "115062314",
+        "number": 29
       },
       {
-        "period": "115062303",
-        "number": 12
-      },
-      {
-        "period": "115062304",
-        "number": 18
-      },
-      {
-        "period": "115062305",
-        "number": 40
-      },
-      {
-        "period": "115062306",
-        "number": 77
-      },
-      {
-        "period": "115062307",
-        "number": 41
+        "period": "115062315",
+        "number": 71
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 440,
+      "rounds": 441,
       "hits": 67,
-      "rate": 0.15227272727272728,
+      "rate": 0.15192743764172337,
       "wilson95": {
-        "lower": 0.12172144631150165,
-        "upper": 0.18884340385125908
+        "lower": 0.12144111210558656,
+        "upper": 0.1884255910085107
       }
     },
     "GAP_SHORT": {
-      "rounds": 440,
+      "rounds": 441,
       "hits": 65,
-      "rate": 0.14772727272727273,
+      "rate": 0.1473922902494331,
       "wilson95": {
-        "lower": 0.11762457181326282,
-        "upper": 0.18392805416861902
+        "lower": 0.11735376376703285,
+        "upper": 0.18352097456679203
       }
     }
   }
