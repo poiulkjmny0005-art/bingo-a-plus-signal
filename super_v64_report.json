@@ -1,76 +1,40 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-11-08T01:28:31.244Z",
-  "latestPeriod": "115063162",
+  "generatedAt": "2026-11-08T07:44:03.007Z",
+  "latestPeriod": "115063237",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 511,
+  "completedRounds": 518,
   "active": {
-    "anchorPeriod": "115063152",
+    "anchorPeriod": "115063236",
     "picks": {
-      "HOT100": 1,
-      "GAP_SHORT": 24
+      "HOT100": 3,
+      "GAP_SHORT": 59
     },
     "draws": [
       {
-        "period": "115063153",
-        "number": 27
-      },
-      {
-        "period": "115063154",
-        "number": 58
-      },
-      {
-        "period": "115063155",
-        "number": 60
-      },
-      {
-        "period": "115063156",
-        "number": 77
-      },
-      {
-        "period": "115063157",
-        "number": 4
-      },
-      {
-        "period": "115063158",
-        "number": 32
-      },
-      {
-        "period": "115063159",
-        "number": 72
-      },
-      {
-        "period": "115063160",
-        "number": 61
-      },
-      {
-        "period": "115063161",
-        "number": 69
-      },
-      {
-        "period": "115063162",
-        "number": 23
+        "period": "115063237",
+        "number": 25
       }
     ]
   },
   "results": {
     "HOT100": {
-      "rounds": 511,
+      "rounds": 518,
       "hits": 81,
-      "rate": 0.15851272015655576,
+      "rate": 0.15637065637065636,
       "wilson95": {
-        "lower": 0.12940982913985172,
-        "upper": 0.19271177097948594
+        "lower": 0.12763475384515566,
+        "upper": 0.19016589677372953
       }
     },
     "GAP_SHORT": {
-      "rounds": 511,
-      "hits": 78,
-      "rate": 0.15264187866927592,
+      "rounds": 518,
+      "hits": 79,
+      "rate": 0.1525096525096525,
       "wilson95": {
-        "lower": 0.12405952579225284,
-        "upper": 0.18640800441509636
+        "lower": 0.12411557668794942,
+        "upper": 0.18601991270193446
       }
     }
   }
