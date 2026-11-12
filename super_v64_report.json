@@ -1,35 +1,52 @@
 {
   "version": "6.4-forward",
-  "generatedAt": "2026-11-12T03:59:39.021Z",
-  "latestPeriod": "115064004",
+  "generatedAt": "2026-11-12T12:17:37.272Z",
+  "latestPeriod": "115064104",
   "baseline": 0.14010534075097258,
   "note": "Prospective tracking only. Models were chosen after examining v6.3 holdout; only NEW draws after first v6.4 run are scored. Historical v6.3 holdout results are not independent confirmation.",
-  "completedRounds": 582,
+  "completedRounds": 590,
   "active": {
-    "anchorPeriod": "115064004",
+    "anchorPeriod": "115064100",
     "picks": {
-      "HOT100": 58,
-      "GAP_SHORT": 66
+      "HOT100": 43,
+      "GAP_SHORT": 62
     },
-    "draws": []
+    "draws": [
+      {
+        "period": "115064101",
+        "number": 20
+      },
+      {
+        "period": "115064102",
+        "number": 16
+      },
+      {
+        "period": "115064103",
+        "number": 32
+      },
+      {
+        "period": "115064104",
+        "number": 50
+      }
+    ]
   },
   "results": {
     "HOT100": {
-      "rounds": 582,
-      "hits": 89,
-      "rate": 0.15292096219931273,
+      "rounds": 590,
+      "hits": 90,
+      "rate": 0.15254237288135594,
       "wilson95": {
-        "lower": 0.1259633454177066,
-        "upper": 0.18443045386182566
+        "lower": 0.1257844269059125,
+        "upper": 0.1837957709111485
       }
     },
     "GAP_SHORT": {
-      "rounds": 582,
-      "hits": 92,
-      "rate": 0.15807560137457044,
+      "rounds": 590,
+      "hits": 93,
+      "rate": 0.1576271186440678,
       "wilson95": {
-        "lower": 0.1306911109365356,
-        "upper": 0.18994436459132044
+        "lower": 0.1304502312930716,
+        "upper": 0.18923367094617877
       }
     }
   }
